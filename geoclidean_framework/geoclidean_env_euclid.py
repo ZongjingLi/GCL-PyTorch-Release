@@ -130,6 +130,7 @@ def render(rules, mark_points=False):
             all_viewable_objs.append(obj_shapely)
             
         if mark_points:
+            print(point_a_shapely,euc_obj)
             current_plot = plot_point(current_plot, point_a_shapely)
             current_plot = plot_point(current_plot, point_b_shapely)
         
