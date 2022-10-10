@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 
 
-class GeometricEncoder(nn.Module):
+class FeatureEncoder(nn.Module):
     def __init__(self,input_nc=3,z_dim=64,bottom=False):
         super().__init__()
         self.bottom = bottom
@@ -55,7 +55,7 @@ class GeometricEncoder(nn.Module):
         return feature_map
 
 class FeatureDecoder(nn.Module):
-    def __init__(self, inchannel,input_channel,object_dim = 100):
+    def __init__(self, inchannel):
         super(FeatureDecoder, self).__init__()
         self.im_size = 128
         self.conv1 = nn.Conv2d(inchannel + 2, 32, 3, bias=False)
@@ -68,7 +68,7 @@ class FeatureDecoder(nn.Module):
         # self.bn4 = nn.BatchNorm2d(32)
         self.celu = nn.CELU()
         self.inchannel = inchannel
-        self.conv5_img = nn.Conv2d(32, input_channel, 1)
+
         self.conv5_mask = nn.Conv2d(32, 1, 1)
 
         x = torch.linspace(-1, 1, self.im_size + 8)
@@ -103,9 +103,8 @@ class FeatureDecoder(nn.Module):
         x = self.conv4(x);x = self.celu(x)
         # x = self.bn4(x)
 
-        img = self.conv5_img(x)
-        img = .5 + 0.5 * torch.tanh(img + self.bias)
+
         logitmask = self.conv5_mask(x)
 
 
-        return img, logitmask
+        return logitmask
