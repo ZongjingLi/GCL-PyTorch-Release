@@ -102,7 +102,7 @@ class GCLData(Dataset):
             "params.json"
         ))
 
-    def __len__(self):return len(self.files) - 2
+    def __len__(self):return 30 # len(self.files) 
 
     def __getitem__(self,index):
         index = index + 1

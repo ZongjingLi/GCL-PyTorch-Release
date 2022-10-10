@@ -228,7 +228,7 @@ class GeometricConstructor(nn.Module):
             if node_type == "point": # suppose to decode a point <U,D> -> T[E] -> (x,y)
                 decode_point = self.point_decoder(query_feature)
                 point_target = target[node]
-                self.ploss += torch.nn.functional.mse_loss(decode_point,torch.tensor(point_target))
+                self.ploss += torch.nn.functional.mse_loss(decode_point[0].float(),torch.tensor(point_target).float())
                 return decode_point
             calculated_node[node] = 1
             return 0
