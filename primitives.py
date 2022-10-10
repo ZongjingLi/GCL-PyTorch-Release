@@ -93,8 +93,9 @@ class GeometricConstructor(nn.Module):
         self.downward_memory = None
 
         # local and global encoders
-        self.global_encoder = nn.Transformer(nhead=16, num_encoder_layers=12)
+        self.query_encoder = nn.Transformer(nhead=16, num_encoder_layers=12)
         self.global_encoder = FeatureEncoder(input_nc = 3,z_dim = opt.latent_dim)
+        self.gauge = nn.Linear(64 * 64 * opt.latent_dim,512)
         self.local_encoder = None
         self.local_decoder = FeatureDecoder(opt.latent_dim * 2)
 
@@ -196,12 +197,27 @@ class GeometricConstructor(nn.Module):
         self.downward_memory_storage = downward_memory_storage
         return 
 
-    def construct(self,target = None,image = None):
-        return 0
+    def construct(self,image = None,target = None):
+        calculated_node = {}
+
+        output_image = 0
+        def build(node):
+            node_type = ptype(node)
+            if node_type == "circle": # suppose to decode a mask <D,D> -> T[E] -> M
+                pass
+            if node_type == "line": # suppose to decode a mask <U,D> -> T[E] -> M
+                pass
+            if node_type == "point": # suppose to decode a point <U,D> -> T[E] -> (x,y)
+                pass
+            return 0
+        
+        for node in self.structure.nodes:build(node)
+        return output_image
 
     def train(self,x,concept = None,target_dag = None):
-        feature_encode = self.global_encoder(x)
-        self.global_feature = feature_encode
+        feature_encode = self.global_encoder(x).flatten(start_dim = 1)
+
+        self.global_feature = self.gauge(feature_encode)
 
         self.make_dag(concept)
         self.realize(torch.randn([1,128]))
