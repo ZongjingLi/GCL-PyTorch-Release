@@ -9,3 +9,6 @@ train_parser.add_argument("--lr", default = 2e-4, type = float, help = "the lear
 train_parser.add_argument("--mode", default = "Mode", type = str, help = "the training mode for the geometric concept")
 
 train_config = train_parser.parse_args(args = [])
+
+for epoch in range(train_config.epoch):
+    pass
