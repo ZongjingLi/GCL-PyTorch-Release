@@ -190,7 +190,16 @@ class GeometricConstructor(nn.Module):
         self.downward_memory_storage = downward_memory_storage
         return 
 
-    def forward(self,x):return x
+    def forward(self,x,concept = None,target_dag = None):
+        
+        feature_encode = self.global_encoder(x)
+        self.make_dag(concept)
+        self.realize()
+
+        # do something with the decoder
+        self.constuct(target_dag,x)
+        
+        return x
 
 
 if __name__ == "__main__":
