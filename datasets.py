@@ -7,6 +7,8 @@ from moic.utils import load_json
 from PIL import Image
 from config import *
 
+from moic.utils import load_json
+
 class GeometricObjectsData(Dataset):
     def __init__(self,split = "train",name = "ccc",resolution = model_opt.resolution):
         super().__init__()
@@ -72,3 +74,41 @@ class GeometricElementsData(Dataset):
         programs = [term[1:-3] for term in raw_programs]
         
         return {"image":image,"programs":programs}
+
+
+class GCLData(Dataset):
+    def __init__(self,name = "r1",resolution = model_opt.resolution):
+        super().__init__()
+
+        self.root_dir = "geoclidean_framework"
+        self.concept_name = name
+
+
+        self.files = os.listdir(os.path.join(
+            self.root_dir,"data","{}".format(self.concept_name),
+
+        ))
+        self.concept_path = os.path.join(
+            self.root_dir,"data","{}".format(self.concept_name),
+
+        )
+        self.img_transform = transforms.Compose(
+            [   
+                transforms.ToTensor()]
+        )
+        self.resolution = resolution
+        self.params = load_json(os.path.join(
+            self.root_dir,"data","{}".format(self.concept_name),
+            "params.json"
+        ))
+
+    def __len__(self):return len(self.files)
+
+    def __getitem__(self,index):
+        index = index + 1
+        image = Image.open(os.path.join(self.concept_path,"{}.png").format(index)).convert('L')
+        image = self.img_transform(image.resize(self.resolution))
+
+        params = self.params["data"][index]
+        
+        return {"image":image,"params":params}

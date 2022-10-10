@@ -200,18 +200,21 @@ def save_steps_joint(all_viewable_objs, dir_name, num_steps=3):
     save_plot(dir_name)
     plt.close()
             
+from moic.utils import save_json
+
 def generate_concept(rules, num, mark_points=False, steps_path=None, path=None, show_plots=False):
     i = 0
-
+    save_file = []
     while i < num:
         try:
             all_viewable_objs,points = render(rules, mark_points)
-            print(points)
+            
             if visibility_test(all_viewable_objs):
                 if steps_path:
                     save_steps_joint(all_viewable_objs, steps_path)
                 if path:
                     save_plot(path.format(i))
+                    save_file.append(points)
                     
                 i += 1
                 if not show_plots:
@@ -222,6 +225,8 @@ def generate_concept(rules, num, mark_points=False, steps_path=None, path=None, 
         except:
             plt.close()
             continue 
+    save_json({"data":save_file},"geoclidean_framework/data/r1/params.json")
+    
             
 if __name__ == "__main__":
     r1 = [
@@ -229,4 +234,4 @@ if __name__ == "__main__":
     'c2 = circle(p3(c1), p4())',
     'l3 = line(p5(c1), p6(c1, c2))'
     ]
-    generate_concept(r1,path = "geoclidean_framework/data/r1/{}.png",num = 100)
+    generate_concept(r1,path = "geoclidean_framework/data/r1/{}.png",num = 50)
