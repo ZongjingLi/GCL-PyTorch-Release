@@ -225,7 +225,7 @@ def generate_concept(rules, num, mark_points=False, steps_path=None, path=None, 
         except:
             plt.close()
             continue 
-    save_json({"data":save_file},"geoclidean_framework/data/r1/params.json")
+    save_json({"data":save_file},"geoclidean_framework/data/r2/params.json")
     
             
 if __name__ == "__main__":

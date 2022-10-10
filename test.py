@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 import matplotlib.pyplot as plt
 
-dataset = GCLData("r1")
+dataset = GCLData("r2")
 
 trainloader = DataLoader(dataset)
 
@@ -20,6 +20,10 @@ r1 = [
     'c2 = circle(p3(c1), p4())',
     'l3 = line(p5(c1), p6(c1, c2))'
     ]
+r2 = [
+        'l1 = line(p1(), p2())',
+        'l2 = line(p2(), p3())',
+    ]
 
 for epoch in range(1000):
     loss = 0
@@ -28,7 +32,7 @@ for epoch in range(1000):
         
         image   = sample["image"]
         #concept = [term[0] for term in sample["programs"]]
-        concept = r1
+        concept = r2
       
         outputs = model.train(image,concept,target_dag = sample["params"])
 
