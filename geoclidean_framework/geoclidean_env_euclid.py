@@ -116,6 +116,8 @@ def render(rules, mark_points=False):
     # Render
     all_shapely_obj, all_shapely_point = {}, {}
     all_viewable_objs = []
+
+    points = {}
     
     current_plot = initial_plot()
     for euc_obj in euclidean_objects:
@@ -127,8 +129,9 @@ def render(rules, mark_points=False):
             obj_shapely = action_create_circle(point_a_shapely, point_b_shapely)
 
         if euc_obj.obj_type == "point":print(euc_obj)
-        print(euc_obj.parameters[0].name,euc_obj.parameters[1].name)
-        print(point_a_shapely,point_b_shapely)
+        points[euc_obj.parameters[0].name] = [*point_a_shapely]
+        points[euc_obj.parameters[1].name] = [*point_b_shapely]
+
         all_shapely_point[euc_obj.parameters[0].name] = point_a_shapely
         all_shapely_point[euc_obj.parameters[1].name] = point_b_shapely
         all_shapely_obj[euc_obj.name] = obj_shapely
@@ -141,7 +144,7 @@ def render(rules, mark_points=False):
             current_plot = plot_point(current_plot, point_a_shapely)
             current_plot = plot_point(current_plot, point_b_shapely)
         
-    return all_viewable_objs
+    return all_viewable_objs,points
 
 def numpy_from_plot(ax):
     ax.figure.canvas.draw()
@@ -201,7 +204,8 @@ def generate_concept(rules, mark_points=False, steps_path=None, path=None, show_
     i = 0
     while i < 1:
         try:
-            all_viewable_objs = render(rules, mark_points)
+            all_viewable_objs,points = render(rules, mark_points)
+            print(points)
             if visibility_test(all_viewable_objs):
                 if steps_path:
                     save_steps_joint(all_viewable_objs, steps_path)
@@ -218,3 +222,10 @@ def generate_concept(rules, mark_points=False, steps_path=None, path=None, show_
             plt.close()
             continue 
             
+if __name__ == "__main__":
+    r1 = [
+    'c1 = circle(p1(), p2())',
+    'c2 = circle(p3(c1), p4())',
+    'l3 = line(p5(c1), p6(c1, c2))'
+    ]
+    generate_concept(r1,path = "data/")
