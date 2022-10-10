@@ -233,8 +233,7 @@ class GeometricConstructor(nn.Module):
         
         for node in self.structure.nodes:
             build_component =  build(node)
-            try:print(build_component.shape)
-            except:pass
+
             output_image += build_component
         return output_image
 

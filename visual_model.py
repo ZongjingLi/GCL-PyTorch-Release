@@ -57,7 +57,7 @@ class FeatureEncoder(nn.Module):
 class FeatureDecoder(nn.Module):
     def __init__(self, inchannel):
         super(FeatureDecoder, self).__init__()
-        self.im_size = 128
+        self.im_size = 64
         self.conv1 = nn.Conv2d(inchannel + 2, 32, 3, bias=False)
         # self.bn1 = nn.BatchNorm2d(32)
         self.conv2 = nn.Conv2d(32, 32, 3, bias=False)
