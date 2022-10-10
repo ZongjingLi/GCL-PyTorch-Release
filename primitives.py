@@ -31,6 +31,13 @@ def parse_geoclidean(programs = dgc):
         outputs.append(func_node_form)
     return outputs
 
+class PointDecoder(nn.Module):
+    def __init__(self,in_dim = 512):
+        super().__init__()
+        self.raw_decoder = FCBlock(132,4,in_dim,2)
+        self.scale = 32
+    def forward(self,x):return torch.tensor([[32,32]]) + self.scale * self.raw_decoder(x)
+
 class PointProp(nn.Module):
     def __init__(self,opt):
         super().__init__()
@@ -97,7 +104,8 @@ class GeometricConstructor(nn.Module):
         self.global_encoder = FeatureEncoder(input_nc = 3,z_dim = opt.latent_dim)
         self.gauge = nn.Linear(64 * 64 * opt.latent_dim,512)
         self.local_encoder = None
-        self.local_decoder = FeatureDecoder(opt.latent_dim * 2)
+        self.local_decoder = FeatureDecoder(512)
+        self.point_decoder = PointDecoder(512)
 
         # store some basic configs
         self.resolution = opt.resolution
@@ -176,7 +184,7 @@ class GeometricConstructor(nn.Module):
         
         for node in self.structure.nodes:quest_down(node)
         # update the memory unit after the propagation
-        self.upward_memory_storage   = upward_memory_storage
+        self.upward_memory = upward_memory_storage
 
         # 2. start the downward propagation. (maybe not)
         downward_memory_storage   = {}
@@ -186,7 +194,7 @@ class GeometricConstructor(nn.Module):
             connect_to     =  find_connection(node,self.structure,loc = 0) # find all the nodes that connected to the current node
 
             input_neighbors = [quest_up(p_node) for p_node in connect_to]
-            current_node_feature = self.upward_memory_storage[node] # this is the feature a point store currently (circle,point,line aware)
+            current_node_feature = self.upward_memory[node] # this is the feature a point store currently (circle,point,line aware)
             update_component = self.message_propagator(current_node_feature,input_neighbors) # this is the update component feature
         
             downward_memory_storage[node] = update_component 
@@ -194,7 +202,7 @@ class GeometricConstructor(nn.Module):
         for node in self.structure: quest_up(node)
 
         # update the memory unit of the propagation
-        self.downward_memory_storage = downward_memory_storage
+        self.downward_memory = downward_memory_storage
         return 
 
     def construct(self,image = None,target = None):
@@ -202,16 +210,28 @@ class GeometricConstructor(nn.Module):
 
         output_image = 0
         def build(node):
+            if node in calculated_node:return
+            if node == "<V>":return 0
             node_type = ptype(node)
-            if node_type == "circle": # suppose to decode a mask <D,D> -> T[E] -> M
-                pass
+            u_feature,d_feature = self.upward_memory[node],self.downward_memory[node]
+            node_feature = torch.cat([u_feature,d_feature],-1)
+            
+            query_feature = self.query_encoder(self.global_feature,node_feature)
+            if node_type == "circle": # suppose to decode a mask <U,D> -> T[E] -> M
+                mask = self.local_decoder(query_feature)
+                if node in self.visible:return mask
+                return 0
             if node_type == "line": # suppose to decode a mask <U,D> -> T[E] -> M
-                pass
+                mask = self.local_decoder(query_feature)
+                if node in self.visible:return mask
+                return 0
             if node_type == "point": # suppose to decode a point <U,D> -> T[E] -> (x,y)
-                pass
+                decode_point = self.point_decoder(query_feature)
+                return 0
+            calculated_node[node] = 1
             return 0
         
-        for node in self.structure.nodes:build(node)
+        for node in self.structure.nodes:output_image += build(node)
         return output_image
 
     def train(self,x,concept = None,target_dag = None):
