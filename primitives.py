@@ -78,6 +78,7 @@ class GeometricConstructor(nn.Module):
         self.realized = False
         self.structure = None
         self.visisble = []
+        self.global_feature = None
 
         self.line_propagator = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
         self.circle_propagator  = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
@@ -103,8 +104,10 @@ class GeometricConstructor(nn.Module):
     def clear(self):
         self.realized  = False # clear the state of dag and the realization
         self.structure = None  # clear the state of cocnept structure 
+        self.global_feature = None # clear the encoder feature on the input image
         self.upward_memory   = None
         self.downward_memory = None 
+        
 
     def make_dag(self,concept_struct):
         """
