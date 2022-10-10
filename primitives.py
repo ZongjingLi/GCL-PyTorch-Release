@@ -78,3 +78,18 @@ class GeometricConstructor(nn.Module):
         self.line_propagator = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
         self.circle_propagator  = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
         self.point_propagator   = PointProp(opt)
+
+        # graph propagation [positional encoding] storage
+        self.upward_memory   = None
+        self.downward_memory = None
+
+        # store some basic configs
+        self.resolution = opt.resolution
+        self.opt = opt
+
+        self.clear()
+    def clear(self):
+        self.realized  = False # clear the state of dag and the realization
+        self.structure = None  # clear the state of cocnept structure 
+        self.upward_memory   = None
+        self.downward_memory = None 
