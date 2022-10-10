@@ -244,9 +244,9 @@ if __name__ == "__main__":
 
     model = GeometricConstructor(model_opt)
     model.train(torch.randn([1,3,64,64]),concept = dgc)
-
+    print(model.visible)
     g = model.structure
     nx.draw_networkx(g)
     plt.show()
-
+    
     model.realize(torch.randn([1,128]))
