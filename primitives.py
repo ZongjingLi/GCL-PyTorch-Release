@@ -89,6 +89,7 @@ class GeometricConstructor(nn.Module):
         self.downward_memory = None
 
         # local and global encoders
+        self.global_encoder = nn.Transformer(nhead=16, num_encoder_layers=12)
         self.global_encoder = FeatureEncoder(input_nc = 3,z_dim = opt.latent_dim)
         self.local_encoder = None
         self.local_decoder = FeatureDecoder(opt.latent_dim * 2)
