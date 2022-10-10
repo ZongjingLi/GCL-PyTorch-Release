@@ -26,17 +26,10 @@ class FeatureDecoder(nn.Module):
         self.register_buffer('y_grid', y_grid.view((1, 1) + y_grid.shape))
         self.bias = 0
 
-        self.object_score_marker   = nn.Linear(128 * 128 * 32,1)
-        #self.object_score_marker   = FCBlock(256,2,64 * 64 * 16,1)
-        #self.object_feature_marker = FCBlock(256,3,64 * 64 * 16,object_dim)
-        self.object_feature_marker = nn.Linear(inchannel,object_dim)
-        self.conv_features         = nn.Conv2d(32,16,3,2,1)
-
-
     def forward(self, z):
         # z (bs, 32)
         bs,_ = z.shape
-        object_features = self.object_feature_marker(z)
+
         z = z.view(z.shape + (1, 1))
 
         # Tile across to match image size
@@ -61,8 +54,5 @@ class FeatureDecoder(nn.Module):
         img = .5 + 0.5 * torch.tanh(img + self.bias)
         logitmask = self.conv5_mask(x)
 
-        conv_features = x.flatten(start_dim=1)
-        
-        object_scores = torch.sigmoid( 0.0001 *  self.object_score_marker(conv_features)) 
 
-        return img, logitmask, object_features,object_scores
+        return img, logitmask
