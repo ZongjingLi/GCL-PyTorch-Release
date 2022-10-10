@@ -234,4 +234,8 @@ if __name__ == "__main__":
     'c2 = circle(p3(c1), p4())',
     'l3 = line(p5(c1), p6(c1, c2))'
     ]
-    generate_concept(r1,path = "geoclidean_framework/data/r1/{}.png",num = 50)
+    r2 = [
+        'l1 = line(p1(), p2())',
+        'l2 = line(p2(), p3())',
+    ]
+    generate_concept(r2,path = "geoclidean_framework/data/r2/{}.png",num = 50)
