@@ -129,8 +129,8 @@ def render(rules, mark_points=False):
             obj_shapely = action_create_circle(point_a_shapely, point_b_shapely)
 
         if euc_obj.obj_type == "point":print(euc_obj)
-        points[euc_obj.parameters[0].name] = [*point_a_shapely]
-        points[euc_obj.parameters[1].name] = [*point_b_shapely]
+        points[euc_obj.parameters[0].name] = [point_a_shapely.x,point_a_shapely.y]
+        points[euc_obj.parameters[1].name] = [point_b_shapely.x,point_b_shapely.y]
 
         all_shapely_point[euc_obj.parameters[0].name] = point_a_shapely
         all_shapely_point[euc_obj.parameters[1].name] = point_b_shapely
@@ -200,9 +200,10 @@ def save_steps_joint(all_viewable_objs, dir_name, num_steps=3):
     save_plot(dir_name)
     plt.close()
             
-def generate_concept(rules, mark_points=False, steps_path=None, path=None, show_plots=False):
+def generate_concept(rules, num, mark_points=False, steps_path=None, path=None, show_plots=False):
     i = 0
-    while i < 1:
+
+    while i < num:
         try:
             all_viewable_objs,points = render(rules, mark_points)
             print(points)
@@ -210,7 +211,7 @@ def generate_concept(rules, mark_points=False, steps_path=None, path=None, show_
                 if steps_path:
                     save_steps_joint(all_viewable_objs, steps_path)
                 if path:
-                    save_plot(path)
+                    save_plot(path.format(i))
                     
                 i += 1
                 if not show_plots:
@@ -228,4 +229,4 @@ if __name__ == "__main__":
     'c2 = circle(p3(c1), p4())',
     'l3 = line(p5(c1), p6(c1, c2))'
     ]
-    generate_concept(r1,path = "data/")
+    generate_concept(r1,path = "geoclidean_framework/data/r2/{}.png",num = 10)
