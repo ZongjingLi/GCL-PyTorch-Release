@@ -8,6 +8,10 @@ import networkx as nx
 
 from visual_model import * 
 
+import matplotlib.pyplot as plt
+from geoclidean_framework.geoclidean_env_euclid import *
+from geoclidean_framework.plot_utils import *
+
 from config import *
 
 def ptype(inputs):
@@ -206,40 +210,58 @@ class GeometricConstructor(nn.Module):
         return 
 
     def construct(self,image = None,target = None):
+        plt.cla()
         calculated_node = {}
+
+        all_view_objects =[]
 
         output_image = 0
         def build(node):
-            if node in calculated_node:return 0
+            if node in calculated_node:return calculated_node[node]
             if node == "<V>":return 0
             node_type = ptype(node)
             u_feature,d_feature = self.upward_memory[node],self.downward_memory[node]
             node_feature = torch.cat([u_feature,d_feature],-1)
+
+            connect_to = find_connection(node,self.structure,1)
             
             query_feature = self.query_encoder(self.global_feature,node_feature)
             if node_type == "circle": # suppose to decode a mask <U,D> -> T[E] -> M
+                p1 = build(connect_to[0]);p2 = build(connect_to[1])
+                point_center = Point(p1[0][0],p1[0][1])
+                point_c = Point(p2[0][0],p2[0][1])
+                radius = point_center.distance(point_c)
+                circle = Point(point_center.x, point_center.y).buffer(radius)
                 
-                if node in self.visible:return 0
+                if node in self.visible:all_view_objects.append(circle)
                 return 0
             if node_type == "line": # suppose to decode a mask <U,D> -> T[E] -> M
+                p1 = build(connect_to[0]);p2 = build(connect_to[1])
+                point_a = Point(p1[0][0],p1[0][1])
+                point_b = Point(p2[0][0],p2[0][1])
                 
-                if node in self.visible:return 0
+                if node in self.visible:all_view_objects.append(LineString([(point_a.x, point_a.y), (point_b.x, point_b.y)]))
                 return 0
             if node_type == "point": # suppose to decode a point <U,D> -> T[E] -> (x,y)
                 decode_point = self.point_decoder(query_feature)
+                calculated_node[node] = decode_point
                 point_target = target[node]
                 point_wise_loss = torch.nn.functional.mse_loss(decode_point[0].float(),torch.tensor(point_target).float())
                 print(point_wise_loss)
+
                 self.ploss += point_wise_loss
                 return decode_point
             calculated_node[node] = 1
             return 0
         
-        for node in self.structure.nodes:
-            build_component =  build(node)
+        for node in self.structure.nodes:build(node)
 
-            output_image += build_component
-        return output_image
+        plt.figure("inputs vs recons")
+        plt.subplot(122);plt.cla();
+        for obj in all_view_objects:plot_object(obj)
+        plt.pause(0.001)
+        
+        return 
 
     def train(self,x,concept = None,target_dag = None):
         feature_encode = self.global_encoder(x).flatten(start_dim = 1)
@@ -264,6 +286,22 @@ class GeometricConstructor(nn.Module):
         
         return x
 
+def plot_object(obj, color="black"):
+    if isinstance(obj, Polygon):
+        obj = obj.exterior
+    x, y = obj.xy
+    plt.plot(x, y, linewidth=3, color=color)
+
+def initial_plot():
+    loc = plticker.MultipleLocator(base=1.0)
+
+    fig = plt.figure(figsize=(5, 5))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_major_locator(loc)
+    ax.yaxis.set_major_locator(loc)
+    ax.axis('equal')
+    ax.axis('off') 
+    return ax
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
