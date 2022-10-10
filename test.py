@@ -32,7 +32,7 @@ for epoch in range(1000):
 
         plt.figure("inputs vs recons")
         plt.subplot(121);plt.imshow(image[0].permute([1,2,0]),cmap = "binary")
-        plt.subplot(122);plt.imshow(outputs[0].detach().exp().permute([1,2,0]),cmap = "binary")
+        #plt.subplot(122);plt.imshow(outputs[0].detach().exp().permute([1,2,0]),cmap = "binary")
         plt.pause(0.01)
 
         loss += model.ploss
