@@ -27,6 +27,23 @@ def parse_geoclidean(programs = dgc):
         outputs.append(func_node_form)
     return outputs
 
+class PointProp(nn.Module):
+    def __init__(self,opt):
+        super().__init__()
+        self.opt = opt
+        self.update_map   = nn.Linear(opt.latent_dim,opt.latent_dim)
+        self.message_map  = nn.Linear(opt.latent_dim,opt.latent_dim)
+        self.joint_update = FCBlock(132,2,opt.encoder_dim + opt.latent_dim,opt.latent_dim)
+
+    def forward(self,signal,components):
+        if not components: 
+            return self.joint_update(torch.cat([signal,torch.zeros([1,self.opt.geometric_latent_dim])] ,-1))
+        right_inters = 0
+        for comp in components:right_inters += self.message_map(comp)
+
+        right_inters = self.update_map(right_inters)
+        return self.joint_update(torch.cat([signal,right_inters],-1))
+
 class MessageProp(nn.Module):
     def __init__(self,opt):
         super().__init__()
@@ -53,3 +70,11 @@ def find_connection(node,graph,loc = 0):
 class GeometricConstructor(nn.Module):
     def __init__(self,opt = model_opt):
         super().__init__()
+
+        self.realized = False
+        self.structure = None
+        self.visisble = []
+
+        self.line_propagator = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
+        self.circle_propagator  = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
+        self.point_propagator   = PointProp(opt)
