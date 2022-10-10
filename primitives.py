@@ -196,15 +196,15 @@ class GeometricConstructor(nn.Module):
         self.downward_memory_storage = downward_memory_storage
         return 
 
-    def construct(self,target = None):
+    def construct(self,target = None,image = None):
         return 0
 
     def train(self,x,concept = None,target_dag = None):
-        feature_encode = self.gloval_encoder(x)
+        feature_encode = self.global_encoder(x)
         self.global_feature = feature_encode
 
         self.make_dag(concept)
-        self.realize()
+        self.realize(torch.randn([1,128]))
 
         # do something with the decoder
         self.construct(target_dag,x)
@@ -227,7 +227,7 @@ if __name__ == "__main__":
     dgc = ["l1 = line(p1(), p2())","c1* = circle(p1(), p2())","c2* = circle(p2(), p1())","l2 = line(p1(), p3(c1, c2))","l3 = line(p2(), p3()))"]
 
     model = GeometricConstructor(model_opt)
-    model.make_dag(dgc)
+    model.train(torch.randn([1,3,64,64]),concept = dgc)
 
     g = model.structure
     nx.draw_networkx(g)
