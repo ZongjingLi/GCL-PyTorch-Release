@@ -101,7 +101,7 @@ class GeometricConstructor(nn.Module):
 
         # local and global encoders
         self.query_encoder = nn.Transformer(nhead=16, num_encoder_layers=12)
-        self.global_encoder = FeatureEncoder(input_nc = 3,z_dim = opt.latent_dim)
+        self.global_encoder = FeatureEncoder(input_nc = 1,z_dim = opt.latent_dim)
         self.gauge = nn.Linear(64 * 64 * opt.latent_dim,512)
         self.local_encoder = None
         self.local_decoder = FeatureDecoder(512)
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     dgc = ["l1 = line(p1(), p2())","c1* = circle(p1(), p2())","c2* = circle(p2(), p1())","l2 = line(p1(), p3(c1, c2))","l3 = line(p2(), p3()))"]
 
     model = GeometricConstructor(model_opt)
-    outputs = model.train(torch.randn([1,3,64,64]),concept = dgc)
+    outputs = model.train(torch.randn([1,1,64,64]),concept = dgc)
     print(outputs.shape)
     g = model.structure
     nx.draw_networkx(g)

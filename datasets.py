@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import Dataset,DataLoader
 from moic.utils import load_json
 from PIL import Image
-from .config import *
+from config import *
 
 class GeometricObjectsData(Dataset):
     def __init__(self,split = "train",name = "ccc",resolution = model_opt.resolution):
