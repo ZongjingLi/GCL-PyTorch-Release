@@ -218,16 +218,18 @@ class GeometricConstructor(nn.Module):
             
             query_feature = self.query_encoder(self.global_feature,node_feature)
             if node_type == "circle": # suppose to decode a mask <U,D> -> T[E] -> M
-                mask = self.local_decoder(query_feature)
-                if node in self.visible:return mask
+                
+                if node in self.visible:return 0
                 return 0
             if node_type == "line": # suppose to decode a mask <U,D> -> T[E] -> M
-                mask = self.local_decoder(query_feature)
-                if node in self.visible:return mask
+                
+                if node in self.visible:return 0
                 return 0
             if node_type == "point": # suppose to decode a point <U,D> -> T[E] -> (x,y)
                 decode_point = self.point_decoder(query_feature)
-                return 0
+                point_target = target[node]
+                self.ploss += torch.nn.functional.mse_loss(decode_point,torch.tensor(point_target))
+                return decode_point
             calculated_node[node] = 1
             return 0
         
@@ -247,7 +249,7 @@ class GeometricConstructor(nn.Module):
 
         # do something with the decoder
         
-        return self.construct(target_dag,x)
+        return self.construct(x,target_dag)
 
     def forward(self,x,concept = None,target_dag = None):
         

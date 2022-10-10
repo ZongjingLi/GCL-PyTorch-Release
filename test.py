@@ -28,7 +28,7 @@ for epoch in range(1000):
         #concept = [term[0] for term in sample["programs"]]
         concept = r1
       
-        outputs = model.train(image,concept)
+        outputs = model.train(image,concept,target_dag = sample["params"])
 
         plt.figure("inputs vs recons")
         plt.subplot(121);plt.imshow(image[0].permute([1,2,0]),cmap = "binary")
