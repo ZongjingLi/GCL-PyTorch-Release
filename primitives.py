@@ -210,7 +210,7 @@ class GeometricConstructor(nn.Module):
 
         output_image = 0
         def build(node):
-            if node in calculated_node:return
+            if node in calculated_node:return 0
             if node == "<V>":return 0
             node_type = ptype(node)
             u_feature,d_feature = self.upward_memory[node],self.downward_memory[node]
@@ -231,7 +231,11 @@ class GeometricConstructor(nn.Module):
             calculated_node[node] = 1
             return 0
         
-        for node in self.structure.nodes:output_image += build(node)
+        for node in self.structure.nodes:
+            build_component =  build(node)
+            try:print(build_component.shape)
+            except:pass
+            output_image += build_component
         return output_image
 
     def train(self,x,concept = None,target_dag = None):
@@ -243,8 +247,8 @@ class GeometricConstructor(nn.Module):
         self.realize(torch.randn([1,128]))
 
         # do something with the decoder
-        self.construct(target_dag,x)
-        return x
+        
+        return self.construct(target_dag,x)
 
     def forward(self,x,concept = None,target_dag = None):
         
@@ -263,8 +267,8 @@ if __name__ == "__main__":
     dgc = ["l1 = line(p1(), p2())","c1* = circle(p1(), p2())","c2* = circle(p2(), p1())","l2 = line(p1(), p3(c1, c2))","l3 = line(p2(), p3()))"]
 
     model = GeometricConstructor(model_opt)
-    model.train(torch.randn([1,3,64,64]),concept = dgc)
-    print(model.global_feature.shape)
+    outputs = model.train(torch.randn([1,3,64,64]),concept = dgc)
+    print(outputs.shape)
     g = model.structure
     nx.draw_networkx(g)
     plt.show()

@@ -33,7 +33,7 @@ class GeometricObjectsData(Dataset):
 
     def __getitem__(self,index):
         index = index + 1
-        image = Image.open(os.path.join(self.concept_path,"{}_fin.png").format(index))
+        image = Image.open(os.path.join(self.concept_path,"{}_fin.png").format(index)).convert('L')
         image = self.img_transform(image.resize(self.resolution))
         concept_file = open(os.path.join(self.root_dir,"constraints","concept_{}".format(self.concept_name),"concept.txt"), "r")
         programs = concept_file.readlines()
@@ -65,7 +65,7 @@ class GeometricElementsData(Dataset):
 
     def __getitem__(self,index):
         index = index + 1
-        image = Image.open(os.path.join(self.concept_path,"{}_fin.png").format(index)).convert("RGB")
+        image = Image.open(os.path.join(self.concept_path,"{}_fin.png").format(index)).convert('L')
         image = self.img_transform(image.resize(self.resolution))
         concept_file = open(os.path.join(self.root_dir,"elements","concept_{}".format(self.concept_name),"concept.txt"), "r")
         raw_programs = concept_file.readlines()
