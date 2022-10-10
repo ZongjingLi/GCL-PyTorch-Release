@@ -79,7 +79,10 @@ class GeometricConstructor(nn.Module):
         self.structure = None
         self.visisble = []
         self.global_feature = None
+        self.mloss = 0 # loss of the mask prediction
+        self.ploss = 0 # loss of the point decoder
 
+        # this is the feature propagator for upward and downward quest
         self.line_propagator = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
         self.circle_propagator  = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
         self.point_propagator   = PointProp(opt)
@@ -107,6 +110,9 @@ class GeometricConstructor(nn.Module):
         self.global_feature = None # clear the encoder feature on the input image
         self.upward_memory   = None
         self.downward_memory = None 
+
+        self.mloss = 0 # this is the loss for the mask prediction
+        self.ploss = 0 # this is the loss for the single point
         
 
     def make_dag(self,concept_struct):
@@ -189,6 +195,20 @@ class GeometricConstructor(nn.Module):
         # update the memory unit of the propagation
         self.downward_memory_storage = downward_memory_storage
         return 
+
+    def construct(self,target = None):
+        return 0
+
+    def train(self,x,concept = None,target_dag = None):
+        feature_encode = self.gloval_encoder(x)
+        self.global_feature = feature_encode
+
+        self.make_dag(concept)
+        self.realize()
+
+        # do something with the decoder
+        self.construct(target_dag,x)
+        return x
 
     def forward(self,x,concept = None,target_dag = None):
         
