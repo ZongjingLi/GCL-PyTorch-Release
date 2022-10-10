@@ -25,6 +25,8 @@ def plot_obj(ax, obj, color="black"):
 def plot_point(ax, point, color="black"):
     x, y = point.xy
     ax.scatter(x, y, linewidth=5, color=color)
+    print(point)
+    print(x,y)
     return ax
     
 def plot_intersection(ax, intersection):
