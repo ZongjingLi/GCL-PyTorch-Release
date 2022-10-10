@@ -121,6 +121,7 @@ def render(rules, mark_points=False):
             obj_shapely = action_create_line(point_a_shapely, point_b_shapely)
         if euc_obj.obj_type == 'circle':
             obj_shapely = action_create_circle(point_a_shapely, point_b_shapely)
+        if euc_obj.obj_type == "point":print(euc_obj)
         all_shapely_point[euc_obj.parameters[0].name] = point_a_shapely
         all_shapely_point[euc_obj.parameters[1].name] = point_b_shapely
         all_shapely_obj[euc_obj.name] = obj_shapely
@@ -130,7 +131,6 @@ def render(rules, mark_points=False):
             all_viewable_objs.append(obj_shapely)
             
         if mark_points:
-            print(point_a_shapely,euc_obj)
             current_plot = plot_point(current_plot, point_a_shapely)
             current_plot = plot_point(current_plot, point_b_shapely)
         
