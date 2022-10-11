@@ -20,28 +20,16 @@ detected_circles = cv2.HoughCircles(gray_blurred,
                                     param2 = 30, minRadius = 2, maxRadius = 150)
 
 edges = cv2.Canny(gray_blurred,75, 150)
-#detected_lines= cv2.HoughLinesP(edges, 1, np.pi/180, 20, maxLineGap=50)
-detected_lines= cv2.HoughLines(edges, 1, np.pi/180,90)
+detected_lines= cv2.HoughLinesP(edges, 1, np.pi/180, 40, maxLineGap=100)
+#detected_lines= cv2.HoughLines(gray_blurred, 1, np.pi/180,700)
 
 output_lines = []
 
 if detected_lines is not None:
     for line in detected_lines:
-        rho, theta = line[0]
-        a = np.cos(theta)
-        b = np.sin(theta)
-        x0 = a * rho
-        y0 = b * rho
-        # x1 stores the rounded off value of (r* cosΘ - 1000 * sinΘ)
-        x1 = int(x0 + 1000 * (-b))
-        # y1 stores the rounded off value of (r * sinΘ + 1000 * cosΘ)
-        y1 = int(y0 + 1000 * (a))
-        # x2 stores the rounded off value of (r * cosΘ + 1000 * sinΘ)
-        x2 = int(x0 - 1000 * (-b))
-        # y2 stores the rounded off value of (r * sinΘ - 1000 * cosΘ)
-        y2 = int(y0 - 1000 * (a))
+        x1, y1, x2, y2 = line[0]
+        cv2.line(img, (x1, y1), (x2, y2), (0, 0, 128), 1)
 
-        cv2.line(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
 
 cv2.imshow("Detected Circle",img)
 cv2.waitKey(0)
