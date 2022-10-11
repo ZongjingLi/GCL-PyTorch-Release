@@ -6,24 +6,28 @@ import numpy as np
 
 image_path = "geoclidean/constraints/concept_ccc/test/in_5_fin.png"
 image_path = "geoclidean/constraints/concept_cccl/train/1_fin.png"
+image_path = "geoclidean/constraints/concept_lll/train/2_fin.png"
 # read the image
 
 img = cv2.imread(image_path,cv2.IMREAD_COLOR)
 # convert to gray scale
 
-gray_blurred = cv2.cvtColor(img ,cv2.COLOR_BGR2GRAY)
+gray_blurred = cv2.cvtColor(img ,cv2.COLOR_RGBA2GRAY)
 # blur using the 3x3 kernel
 
 detected_circles = cv2.HoughCircles(gray_blurred,
                                     cv2.HOUGH_GRADIENT,1,40,param1 = 50,
                                     param2 = 30, minRadius = 2, maxRadius = 150)
 
-edges = cv2.Canny(gray_blurred,50,200,None,apertureSize = 3)
-maxLineGap = 100
-detected_lines= lines = cv2.HoughLinesP(edges,1,np.pi/180,10,1,maxLineGap)
+edges = cv2.Canny(gray_blurred,75, 150)
+detected_lines= cv2.HoughLinesP(edges, 1, np.pi/180, 20, maxLineGap=50)
+
+
+output_lines = []
 
 if detected_lines is not None:
     for x1,y1,x2,y2 in detected_lines[0]:
+        output_lines.append([(x1,y1),(x2,y2)])
         cv2.line(img,(x1,y1),(x2,y2),(0,255,0),2)
 
 cv2.imshow("Detected Circle",img)
@@ -61,3 +65,4 @@ def parse_raw_points(image):
     return 0
 
 print(output_circles)
+print(output_lines)
