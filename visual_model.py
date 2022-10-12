@@ -108,3 +108,7 @@ class FeatureDecoder(nn.Module):
 
 
         return logitmask
+
+
+def construct(self,components):
+    def build(node):

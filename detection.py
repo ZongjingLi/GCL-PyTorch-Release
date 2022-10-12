@@ -20,12 +20,17 @@ def raw_parse(image_path):
     gray_blurred = cv2.cvtColor(img ,cv2.COLOR_RGBA2GRAY)
     # blur using the 3x3 kernel
 
-    detected_circles = cv2.HoughCircles(gray_blurred,
-                                    cv2.HOUGH_GRADIENT,1,40,param1 = 60,
-                                    param2 = 30, minRadius = 4, maxRadius = 150)
+    #gray_blurred = cv2.medianBlur(gray_blurred,3)
 
-    edges = cv2.Canny(gray_blurred,25, 250)
-    detected_lines= cv2.HoughLinesP(edges, 1, np.pi/180, 60, maxLineGap=200)
+    detected_circles = cv2.HoughCircles(gray_blurred, 
+                   cv2.HOUGH_GRADIENT, 1, 60, param1 = 80,param2 = 30, minRadius = 1, maxRadius = 155)
+    #cv2.HoughCircles(gray_blurred,
+                                    #cv2.HOUGH_GRADIENT,1,55,param1 = 70,
+                                    #param2 = 30, minRadius = 5, maxRadius = 150)
+
+
+    edges = cv2.Canny(gray_blurred,25, 50)
+    detected_lines= cv2.HoughLinesP(edges, 1, np.pi/180, 60, maxLineGap=150)
     #detected_lines= cv2.HoughLines(gray_blurred, 1, np.pi/180,700)
 
     output_lines = []
@@ -75,7 +80,7 @@ names = ["ang_bisector","angle","diameter","eq_t","oblong","parallel_l",
         "perp_bisector","quadrilateral","radii","rectilinear","rhomboid",
         "rhombus","right_ang_t","segment","sixty_ang","square","triangle"]
 
-def reveal_all_concepts(names,split = "train0"):
+def reveal_all_concepts(names,split = "train"):
     image_path = "geoclidean/elements/concept_{}/{}/{}_fin.png"
     for name in names:
         for i in range(5):
@@ -92,6 +97,6 @@ def reveal_all_constraints(names,split = "train"):
 cons = ["ccc","cccc","cccl","ccl","cct","clcc","clcl","cll","clll","clt","lcc",
 "llcc","lll","lllc","llll","llt","tcc","tcl","tll"]
 
-reveal_all_constraints(cons)
+#reveal_all_constraints(cons)
 
 reveal_all_concepts(names)
