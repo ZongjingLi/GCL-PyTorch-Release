@@ -94,6 +94,7 @@ class GeometricConstructor(nn.Module):
         self.global_feature = None
         self.mloss = 0 # loss of the mask prediction
         self.ploss = 0 # loss of the point decoder
+        self.constrution_logp = 0 # the log prob of a configuruation is created.
 
         # this is the feature propagator for upward and downward quest
         self.line_propagator = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
