@@ -9,8 +9,8 @@ import networkx as nx
 from visual_model import * 
 
 import matplotlib.pyplot as plt
-from geoclidean_framework.geoclidean_env_euclid import *
-from geoclidean_framework.plot_utils import *
+
+from shapely.geometry import Point, Polygon, LineString, MultiPoint, MultiLineString
 
 from config import *
 
