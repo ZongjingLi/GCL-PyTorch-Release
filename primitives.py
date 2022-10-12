@@ -211,7 +211,20 @@ class GeometricConstructor(nn.Module):
         self.downward_memory = downward_memory_storage
         return 
 
-    def construct(self,image = None,target = None):
+    def construct(self,lcnet):
+        # lcnet provides a set of lines and circles with embeddings
+        lines   = lcnet.lines # embeddings with a diction
+        circles = lcnet.circles # embeddings with a diction
+
+        realized_visibles = []
+        def build_node(node):
+            if node not in self.visible:return
+            if ptype(node) == "point":return
+        
+        for node in self.structure.nodes:build_node(node)
+        
+
+    def construct_legacy(self,image = None,target = None):
         plt.cla()
         calculated_node = {}
 
