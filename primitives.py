@@ -415,19 +415,40 @@ class GeometricConstructor(nn.Module):
         # update the memory unit of the propagation
         self.downward_memory = downward_memory_storage
         return 
-
+    
     def construct(self,lcnet):
         # lcnet provides a set of lines and circles with embeddings
-        lines   = lcnet.lines # embeddings with a diction
-        circles = lcnet.circles # embeddings with a diction
+        line_features   = lcnet.lines_embeddings # embeddings with a diction
+        circle_features = lcnet.circles_embeddings # embeddings with a diction
+
+        lines  = lcnet.lines
+        circle = lcnet.circles
 
         realized_visibles = []
         def build_node(node):
             if node not in self.visible:return
             if ptype(node) == "point":return
-        
+            if ptype(node) == "line":
+                pass
+            if ptype(node) == "circle":
+                pass
         for node in self.structure.nodes:build_node(node)
 
+def make_pdf(source,choices,mode = "random"):
+    features = torch.cat([choices[k] for k in choices],-1)
+    pdf = torch.softmax(torch.cosine_similarity(features,source)* 5,0)
+    if mode == "random":
+        return np.random.choice(choices.keys(),p = pdf)
+    else:
+        index = np.argmax(pdf.detach().numpy())
+        return choices.keys()[index]
+
+def numpy_from_plot(ax):
+    ax.figure.canvas.draw()
+    data = np.frombuffer(ax.figure.canvas.tostring_rgb(), dtype=np.uint8)
+    w, h = ax.figure.canvas.get_width_height()
+    im = data.reshape((int(h), int(w), -1))
+    return im
 
 def plot_object(obj, color="black"):
     if isinstance(obj, Polygon):
