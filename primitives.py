@@ -288,6 +288,7 @@ class GeometricConstructor(nn.Module):
         
         return x
 
+
 def plot_object(obj, color="black"):
     if isinstance(obj, Polygon):
         obj = obj.exterior

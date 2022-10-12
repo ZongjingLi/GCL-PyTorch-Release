@@ -6,6 +6,7 @@ import argparse
 from datasets import *
 from detection import *
 from primitives import *
+from lcnet import *
 from config import *
 
 train_parser = argparse.ArgumentParser()
@@ -15,25 +16,41 @@ train_parser.add_argument("--mode", default = "Mode", type = str, help = "the tr
 train_parser.add_argument("--checkpoint_path", default = None, help = "the location of the check point")
 train_config = train_parser.parse_args(args = [])
 
+# Binary Cross Entropy Loss, the criterion for the REINFORCE
 BCELoss = torch.nn.BCELoss(reduction = "mean")
 
-model = GeometricConstructor()
 
-dataset = []
+constructor = GeometricConstructor() # the geometric concept encoder 
+lcnet = LCNet() # the encoder of lines and circles
+
+dataset = [] # the geometric concept dataset for training
 train_loader = DataLoader(dataset, batch_size = 1, shuffle = True)
 
-optimizer = torch.optim.Adam(model.parameters(), lr = 2e-4)
+# the Adam optimizer for the constuctor and lcnet
+con_optimizer = torch.optim.Adam(constructor.parameters(), lr = 2e-4)
+lc_optimizer  = torch.optim.Adam(lcnet.parameters(), lr = 2e-4)
 
 for epoch in range(train_config.epoch):
     total_loss = 0
-    optimizer.zero_grad()
+    # clear the gradient and reset the loss
+    con_optimizer.zero_grad()
+    lc_optimizer.zero_grad()
+
     for sample in train_loader:
         concept,image = sample["concept"],sample["image"]
 
+        # realize the concept using the geometric constructor
         model.build_dag(concept)
         model.realize()
 
+        # detect visible components (line and circles) from the image
         lines,circles = detect_lines_and_circles(image)
 
+        # the reconstruction and the logp of that reconstruction
+        recons,logp =   model.construct()
+        total_loss  -=  logp * BCELoss(recons,image)
+
+    # calculate all the gradient and do a REINFORCE
     total_loss.backward()
-    optimizer.step()
+    con_optimizer.step()
+    lc_optimizer.step()
