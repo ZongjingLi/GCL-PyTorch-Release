@@ -111,4 +111,4 @@ class FeatureDecoder(nn.Module):
 
 
 def construct(self,components):
-    def build(node):
+    def build(node):pass
