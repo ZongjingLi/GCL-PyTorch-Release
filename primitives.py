@@ -14,6 +14,8 @@ from geoclidean_framework.plot_utils import *
 
 from config import *
 
+BCELoss= nn.BCELoss(reduction = "mean")
+
 def ptype(inputs):
     if inputs[0] == "c": return "circle"
     if inputs[0] == "l": return "line" 
