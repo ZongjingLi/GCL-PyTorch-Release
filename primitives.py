@@ -6,7 +6,6 @@ from moic.mklearn.nn.functional_net import FCBlock
 
 import networkx as nx
 
-from visual_model import * 
 
 import matplotlib.pyplot as plt
 
@@ -416,23 +415,35 @@ class GeometricConstructor(nn.Module):
         self.downward_memory = downward_memory_storage
         return 
     
-    def construct(self,lcnet):
+    def construct(self,lcnet,mode = "train"):
         # lcnet provides a set of lines and circles with embeddings
         line_features   = lcnet.lines_embeddings # embeddings with a diction
         circle_features = lcnet.circles_embeddings # embeddings with a diction
 
         lines  = lcnet.lines
-        circle = lcnet.circles
+        circles = lcnet.circles
 
         realized_visibles = []
         def build_node(node):
             if node not in self.visible:return
             if ptype(node) == "point":return
+            feature = torch.cat([self.upward_memory[node],self.downward_memory[node]],-1)
             if ptype(node) == "line":
-                pass
+                if mode == "train":
+                    choice = make_pdf(feature,line_features)
+                    line_params = lines[choice]
+                else:
+                    choice = make_pdf(feature,line_features)
+                    line_params = lines[choice]
             if ptype(node) == "circle":
-                pass
+                if mode == "train":
+                    choice = make_pdf(feature,circle_features)
+                    circle_params = circles[choice]
+                else:
+                    choice = make_pdf(feature,circle_features)
+                    circle_params = circles[choice]
         for node in self.structure.nodes:build_node(node)
+        return 0
 
 def make_pdf(source,choices,mode = "random"):
     features = torch.cat([choices[k] for k in choices],-1)
