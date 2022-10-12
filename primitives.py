@@ -84,7 +84,7 @@ def find_connection(node,graph,loc = 0):
         if edge[loc] == node:outputs.append(edge[int(not loc)])
     return outputs
 
-class GeometricConstructor(nn.Module):
+class GeometricConstructorLegacy(nn.Module):
     def __init__(self,opt = model_opt):
         super().__init__()
 
@@ -301,6 +301,132 @@ class GeometricConstructor(nn.Module):
         self.constuct(target_dag,x)
         
         return x
+
+class GeometricConstructor(nn.Module):
+    def __init__(self,opt = model_opt):
+        super().__init__()
+
+        self.realized = False
+        self.structure = None
+        self.visisble = []
+        self.global_feature = None
+        self.constrution_logp = 0 # the log prob of a configuruation is created.
+
+        # this is the feature propagator for upward and downward quest
+        self.line_propagator = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
+        self.circle_propagator  = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
+        self.point_propagator   = PointProp(opt)
+        self.message_propagator = MessageProp(opt)
+
+        # graph propagation [positional encoding] storage
+        self.upward_memory   = None
+        self.downward_memory = None
+
+        # store some basic configs
+        self.resolution = opt.resolution
+        self.opt = opt
+
+        self.clear()
+
+    def clear(self):
+        self.realized  = False # clear the state of dag and the realization
+        self.structure = None  # clear the state of cocnept structure 
+        self.global_feature = None # clear the encoder feature on the input image
+        self.upward_memory   = None
+        self.downward_memory = None         
+
+    def make_dag(self,concept_struct):
+        """
+        input:  the concept struct is a list of func nodes
+        output: make self.struct as a list of nodes and edges
+        """
+        if isinstance(concept_struct[0],str):concept_struct = parse_geoclidean(concept_struct)
+        realized_graph  = nx.DiGraph()
+        self.visible = []
+
+        def parse_node(node):
+            node_name = node.token
+            
+            # if the object is already in the graph, jsut return the name of the concept
+            if node_name in realized_graph.nodes: return node_name
+            if node_name == "":# if this place is a void location.
+                node_name = "<V>";visible = False
+            elif node_name[-1] == "*":
+                node_name = node_name.replace("*","");visible =False
+            else:visible = True
+            realized_graph.add_node(node_name)
+            for child in node.children:
+                if visible:self.visible.append(node_name)
+                realized_graph.add_edge(parse_node(child),node_name) # point from child to current node
+    
+            return node_name
+
+        for program in concept_struct:parse_node(program)
+        self.structure = realized_graph
+        self.realized = True
+    
+        return realized_graph
+
+    def realize(self,signal):
+        # given every node a vector representation
+        # 1. start the upward propagation
+        upward_memory_storage   = {}
+        def quest_down(node):
+            if node in upward_memory_storage:return upward_memory_storage[node]# is it is calculated, nothing happens
+            primitive_type =  ptype(node)
+            connect_to     =  find_connection(node,self.structure,loc = 1)
+            if node == "<V>":return
+            if primitive_type == "circle": # use the circle propagator to calculate mlpc(cat([ec1,ec2]))
+                assert len(connect_to) == 2,print("the circle is connected to {} parameters (2 expected).".format(len(connect_to)))
+                left_component   = quest_down(connect_to[0]);right_component  = quest_down(connect_to[1])
+                update_component = self.circle_propagator(torch.cat([left_component,right_component],-1))
+            if primitive_type == "line":
+                assert len(connect_to) == 2,print("the line is connected to {} parameters (2 expected).".format(len(connect_to)))
+                start_component  = quest_down(connect_to[0]);end_component    = quest_down(connect_to[1])
+                update_component = self.line_propagator(torch.cat([start_component,end_component],-1))
+            if primitive_type == "point":
+                point_prop_inputs = []
+                for component in connect_to:
+                    if component != "<V>":point_prop_inputs.append(quest_down(component)) # the input prior is the intersection of some component
+                update_component = self.point_propagator(signal,point_prop_inputs)
+        
+            upward_memory_storage[node] = update_component 
+            return update_component
+        
+        for node in self.structure.nodes:quest_down(node)
+        # update the memory unit after the propagation
+        self.upward_memory = upward_memory_storage
+
+        # 2. start the downward propagation. (maybe not)
+        downward_memory_storage   = {}
+        def quest_up(node):
+            if node == "<V>":return
+            if node in downward_memory_storage:return downward_memory_storage[node]# if node already calculated, nothing happens
+            connect_to     =  find_connection(node,self.structure,loc = 0) # find all the nodes that connected to the current node
+
+            input_neighbors = [quest_up(p_node) for p_node in connect_to]
+            current_node_feature = self.upward_memory[node] # this is the feature a point store currently (circle,point,line aware)
+            update_component = self.message_propagator(current_node_feature,input_neighbors) # this is the update component feature
+        
+            downward_memory_storage[node] = update_component 
+            return update_component
+        for node in self.structure: quest_up(node)
+
+        # update the memory unit of the propagation
+        self.downward_memory = downward_memory_storage
+        return 
+
+    def construct(self,lcnet):
+        # lcnet provides a set of lines and circles with embeddings
+        lines   = lcnet.lines # embeddings with a diction
+        circles = lcnet.circles # embeddings with a diction
+
+        realized_visibles = []
+        def build_node(node):
+            if node not in self.visible:return
+            if ptype(node) == "point":return
+        
+        for node in self.structure.nodes:build_node(node)
 
 
 def plot_object(obj, color="black"):
