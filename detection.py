@@ -151,5 +151,6 @@ def detect_lines_and_circles(image_path):
 
 #reveal_all_constraints(cons)
 if __name__ == "__main__":
+    reveal_all_concepts(names)
     l,c = detect_lines_and_circles("geoclidean/constraints/concept_lll/train/3_fin.png")
     #reveal_all_concepts(names)
