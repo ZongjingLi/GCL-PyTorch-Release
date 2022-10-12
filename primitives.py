@@ -308,24 +308,16 @@ def plot_object(obj, color="black"):
     x, y = obj.xy
     plt.plot(x, y, linewidth=3, color=color)
 
-def initial_plot():
-    loc = plticker.MultipleLocator(base=1.0)
-
-    fig = plt.figure(figsize=(5, 5))
-    ax = fig.add_subplot(111)
-    ax.xaxis.set_major_locator(loc)
-    ax.yaxis.set_major_locator(loc)
-    ax.axis('equal')
-    ax.axis('off') 
-    return ax
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
     dgc = ["l1 = line(p1(), p2())","c1* = circle(p1(), p2())","c2* = circle(p2(), p1())","l2 = line(p1(), p3(c1, c2))","l3 = line(p2(), p3()))"]
 
     model = GeometricConstructor(model_opt)
-    outputs = model.train(torch.randn([1,1,64,64]),concept = dgc)
-    print(outputs.shape)
+    #outputs = model.train(torch.randn([1,1,64,64]),concept = dgc)
+    #print(outputs.shape)
+    model.make_dag(dgc)
+    model.realize(torch.zeros([1,128]))
     g = model.structure
     nx.draw_networkx(g)
     plt.show()
