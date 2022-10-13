@@ -20,8 +20,8 @@ class LCNet(MessagePassing):
         self.point_count  = 0
 
         # record features from the input lines and circles
-        self.line_features = {}
-        self.circle_features = {}
+        self.line_embeddings   = {}
+        self.circle_embeddings = {}
         # after the propagation
 
         # construct the crude rpresentation of input lines and circles

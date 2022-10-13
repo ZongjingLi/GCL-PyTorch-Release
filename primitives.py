@@ -417,8 +417,8 @@ class GeometricConstructor(nn.Module):
     
     def construct(self,lcnet,mode = "train"):
         # lcnet provides a set of lines and circles with embeddings
-        line_features   = lcnet.lines_embeddings # embeddings with a diction
-        circle_features = lcnet.circles_embeddings # embeddings with a diction
+        line_features   = lcnet.line_embeddings # embeddings with a diction
+        circle_features = lcnet.circle_embeddings # embeddings with a diction
 
         lines  = lcnet.lines
         circles = lcnet.circles
