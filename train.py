@@ -38,7 +38,7 @@ for epoch in range(train_config.epoch):
     lc_optimizer.zero_grad()
 
     for sample in train_loader:
-        raw_concept,image = sample["concept"],sample["image"]
+        raw_concept,image,path = sample["concept"],sample["image"],sample["path"]
         
         concept = [t[0] for t in raw_concept]
         # realize the concept using the geometric constructor
@@ -48,9 +48,11 @@ for epoch in range(train_config.epoch):
         if visualize:
             plt.figure("example");plt.cla();plt.imshow(image[0][0],cmap = "binary")
             plt.figure("concept");plt.cla();nx.draw_networkx(constructor.structure)
-        plt.show()
+        plt.pause(1)
         # detect visible components (line and circles) from the image
-        lines,circles = detect_lines_and_circles(image)
+        print(path[0])
+        lines,circles = detect_lines_and_circles(path[0])
+        print(lines,circles)
         lcnet.build_dag_lc(lines,circles) # use the lc net to create the connection graph
         lcnet.realize_lc() # propgate to get the embedding according to the relations.
 
