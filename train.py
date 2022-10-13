@@ -50,9 +50,9 @@ for epoch in range(train_config.epoch):
             plt.figure("concept");plt.cla();nx.draw_networkx(constructor.structure)
         plt.pause(1)
         # detect visible components (line and circles) from the image
-        print(path[0])
+
         lines,circles = detect_lines_and_circles(path[0])
-        print(lines,circles)
+
         lcnet.build_dag_lc(lines,circles) # use the lc net to create the connection graph
         lcnet.realize_lc() # propgate to get the embedding according to the relations.
 

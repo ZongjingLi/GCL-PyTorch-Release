@@ -32,6 +32,8 @@ class LCNet(MessagePassing):
         # the name of the points will be generated automatically
         self.graph = nx.DiGraph()
 
+        self.net_data = 0
+
         self.update_output = nn.Linear(3,3)
 
     def forward(self,x):return 0
