@@ -46,7 +46,7 @@ for epoch in range(train_config.epoch):
         constructor.realize(torch.zeros([1,128]))
 
         if visualize:
-            plt.figure("example");plt.cla();plt.imshow(image[0][0],cmap = "binary")
+            plt.figure("example");plt.cla();plt.imshow(image[0][0],cmap = "bone")
             plt.figure("concept");plt.cla();nx.draw_networkx(constructor.structure)
         plt.pause(1)
         # detect visible components (line and circles) from the image
