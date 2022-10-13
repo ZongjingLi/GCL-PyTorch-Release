@@ -19,11 +19,12 @@ train_config = train_parser.parse_args(args = [])
 # Binary Cross Entropy Loss, the criterion for the REINFORCE
 BCELoss = torch.nn.BCELoss(reduction = "mean")
 
+visualize = True
 
 constructor = GeometricConstructor() # the geometric concept encoder 
 lcnet = LCNet() # the encoder of lines and circles
 
-dataset = [] # the geometric concept dataset for training
+dataset = GeometricElementsData("train","angle") # the geometric concept dataset for training
 train_loader = DataLoader(dataset, batch_size = 1, shuffle = True)
 
 # the Adam optimizer for the constuctor and lcnet
@@ -38,10 +39,14 @@ for epoch in range(train_config.epoch):
 
     for sample in train_loader:
         concept,image = sample["concept"],sample["image"]
-
+        
         # realize the concept using the geometric constructor
-        model.build_dag(concept)
-        model.realize()
+        constructor.build_dag(concept)
+        constructor.realize()
+
+        if visualize:
+            plt.imshow(image)
+            nx.draw_networkx(constructor.structure)
 
         # detect visible components (line and circles) from the image
         lines,circles = detect_lines_and_circles(image)

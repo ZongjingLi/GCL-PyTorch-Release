@@ -30,6 +30,9 @@ class LCNet(MessagePassing):
         self.points  = {}
 
         # the name of the points will be generated automatically
+        self.graph = nx.DiGraph()
+
+        self.update_output = nn.Linear(3,3)
 
     def forward(self,x):return 0
 
@@ -41,18 +44,17 @@ class LCNet(MessagePassing):
         for line in lines:
             flag = True
             for k in self.lines:
-                if same_line(self.lines[k],line) and flag:flag = False
-            if flag:
-                self.line_count += 1
-                self.lines["l{}".format(self.line_count)] = line
+                if flag and same_line(self.lines[k],line):flag = False # for each line deteced, if it is a new line, add it into the diction.
+            if flag:self.line_count += 1;self.lines["l{}".format(self.line_count)] = line
         for circle in circles:
             flag = True
             for k in self.circles:
-                if same_circle(self.circles[k],circle) and flag:flag = False
-            if flag:
-                self.circle_count += 1
-                self.lines["c{}".format(self.circle_count)] = circle
-
+                if flag and same_circle(self.circles[k],circle):flag = False # for each circle detected, if it is a new circle, added into the diction.
+            if flag:self.circle_count += 1;self.lines["c{}".format(self.circle_count)] = circle
+    
+        x = []
+        edges = []
+        net_data = Data(x,edges)
         return 0
 
     def realize_lc(self):

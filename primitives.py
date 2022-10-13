@@ -334,7 +334,7 @@ class GeometricConstructor(nn.Module):
         self.upward_memory   = None
         self.downward_memory = None         
 
-    def make_dag(self,concept_struct):
+    def build_dag(self,concept_struct):
         """
         input:  the concept struct is a list of func nodes
         output: make self.struct as a list of nodes and edges

@@ -36,10 +36,10 @@ class GeometricObjectsData(Dataset):
     def __getitem__(self,index):
         index = index + 1
         image = Image.open(os.path.join(self.concept_path,"{}_fin.png").format(index)).convert('L')
-        image = self.img_transform(image.resize(self.resolution))
+        image = self.img_transform(image)
         concept_file = open(os.path.join(self.root_dir,"constraints","concept_{}".format(self.concept_name),"concept.txt"), "r")
         programs = concept_file.readlines()
-        return {"image":image,"programs":programs}
+        return {"image":image,"concept":programs}
 
 class GeometricElementsData(Dataset):
     def __init__(self,split = "train",name = "angle",resolution = model_opt.resolution):
@@ -68,12 +68,12 @@ class GeometricElementsData(Dataset):
     def __getitem__(self,index):
         index = index + 1
         image = Image.open(os.path.join(self.concept_path,"{}_fin.png").format(index)).convert('L')
-        image = self.img_transform(image.resize(self.resolution))
+        image = self.img_transform(image)
         concept_file = open(os.path.join(self.root_dir,"elements","concept_{}".format(self.concept_name),"concept.txt"), "r")
         raw_programs = concept_file.readlines()
         programs = [term[1:-3] for term in raw_programs]
         
-        return {"image":image,"programs":programs}
+        return {"image":image,"concept":programs}
 
 
 class GCLData(Dataset):
