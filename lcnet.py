@@ -42,15 +42,15 @@ class LCNet(MessagePassing):
         self.point_count  = 0
     
         for line in lines:
-            flag = True
+            flag = False # the flag for is there is at least one line the same line with the new line
             for k in self.lines:
-                if flag and same_line(self.lines[k],line):flag = False # for each line deteced, if it is a new line, add it into the diction.
-            if flag:self.line_count += 1;self.lines["l{}".format(self.line_count)] = line
+                if not flag and same_line(self.lines[k],line):flag = True # for each line deteced, if it is a new line, add it into the diction.
+            if not flag:self.line_count += 1;self.lines["l{}".format(self.line_count)] = line
         for circle in circles:
-            flag = True
+            flag = False # the flag for is there is at least one circle the same circle with the new circle
             for k in self.circles:
-                if flag and same_circle(self.circles[k],circle):flag = False # for each circle detected, if it is a new circle, added into the diction.
-            if flag:self.circle_count += 1;self.lines["c{}".format(self.circle_count)] = circle
+                if not flag and same_circle(self.circles[k],circle):flag = True # for each circle detected, if it is a new circle, added into the diction.
+            if not flag:self.circle_count += 1;self.lines["c{}".format(self.circle_count)] = circle
     
         x = []
         edges = []
@@ -58,4 +58,5 @@ class LCNet(MessagePassing):
         return 0
 
     def realize_lc(self):
-        return 0
+        x = self.net_data
+        return self.forward(x)
