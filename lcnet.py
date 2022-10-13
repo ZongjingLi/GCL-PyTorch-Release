@@ -36,7 +36,7 @@ class LCNet(MessagePassing):
 
     def forward(self,x):return 0
 
-    def build_lc(self,lines,circles):
+    def build_dag_lc(self,lines,circles):
         self.line_count   = 0
         self.circle_count = 0
         self.point_count  = 0

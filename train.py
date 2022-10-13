@@ -57,7 +57,7 @@ for epoch in range(train_config.epoch):
         lcnet.realize_lc() # propgate to get the embedding according to the relations.
 
         # the reconstruction and the logp of that reconstruction
-        recons,logp =   model.construct(lcnet)
+        recons,logp =   constructor.construct(lcnet)
         total_loss  +=  logp * BCELoss(recons,image) # the reinforce loss, the prob of a recon and the loss of that recon.
 
     # calculate all the gradient and do a REINFORCE
