@@ -2,7 +2,8 @@ import torch
 import torch.nn as nn
 
 from torch_geometric.data import Data
-from torch_geometric.nn import MessagePassing
+import torch.nn.functional as F
+from torch_geometric.nn import GCNConv
 
 import networkx as nx
 
@@ -12,7 +13,7 @@ def same_circle(a,b):return False
 
 def same_line(a,b):return False
 
-class LCNet(MessagePassing):
+class LCNet(nn.Module):
     def __init__(self,opt = model_opt):
         super().__init__()
         self.line_count   = 0
@@ -33,10 +34,19 @@ class LCNet(MessagePassing):
         self.graph = nx.DiGraph()
 
         self.net_data = 0
+        
+        self.conv1 = GCNConv(132, 16)
+        self.conv2 = GCNConv(16, 10)
 
-        self.update_output = nn.Linear(3,3)
+    def forward(self,data):
+        x, edge_index = data.x, data.edge_index
 
-    def forward(self,x):return 0
+        x = self.conv1(x, edge_index)
+        x = F.relu(x)
+        x = F.dropout(x, training=self.training)
+        x = self.conv2(x, edge_index)
+
+        return F.log_softmax(x, dim=1)
 
     def build_dag_lc(self,lines,circles):
         self.line_count   = 0
@@ -62,3 +72,13 @@ class LCNet(MessagePassing):
     def realize_lc(self):
         x = self.net_data
         return self.forward(x)
+
+"""
+edge_index = torch.tensor([[0, 1],
+                           [1, 0],
+                           [1, 2],
+                           [2, 1]], dtype=torch.long)
+x = torch.tensor([[-1], [0], [1]], dtype=torch.float)
+
+data = Data(x=x, edge_index=edge_index.t().contiguous())
+"""
