@@ -38,16 +38,17 @@ for epoch in range(train_config.epoch):
     lc_optimizer.zero_grad()
 
     for sample in train_loader:
-        concept,image = sample["concept"],sample["image"]
+        raw_concept,image = sample["concept"],sample["image"]
         
+        concept = [t[0] for t in raw_concept]
         # realize the concept using the geometric constructor
         constructor.build_dag(concept)
-        constructor.realize()
+        constructor.realize(torch.zeros([1,128]))
 
         if visualize:
-            plt.imshow(image)
+            plt.imshow(image[0][0])
             nx.draw_networkx(constructor.structure)
-
+        plt.show()
         # detect visible components (line and circles) from the image
         lines,circles = detect_lines_and_circles(image)
         lcnet.build_dag_lc(lines,circles) # use the lc net to create the connection graph
