@@ -433,7 +433,7 @@ class GeometricConstructor(nn.Module):
                     #pdf = torch.softmax(torch.cosine_similarity(feature,line_features[1])* 5,0)
                     #self.construction_logp += torch.log(pdf[0])
                     choice,p = make_pdf(feature,line_features);self.construction_logp += torch.log(p)
-                    line_params = lmap[choice]
+                    line_params = lmap[choice];realized_visibles.append(LineString(line_params))
 
                 else:
                     choice = make_pdf(feature,line_features);self.construction_logp += torch.log(p)
@@ -441,11 +441,14 @@ class GeometricConstructor(nn.Module):
             if ptype(node) == "circle":
                 if mode == "train":
                     choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
-                    circle_params = cmap[choice]
+                    circle_params = cmap[choice];realized_visibles.append(Point(circle_params[0], circle_params[1]).buffer(circle_params[2]))
                 else:
                     choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
                     #circle_params = circles[choice]
         for node in self.structure.nodes:build_node(node)
+        plt.figure("recon")
+        for obj  in realized_visibles:plot_object(obj)
+        plt.pause(0.0001)
         return 0,self.construction_logp
 
 def make_pdf(source,choices,mode = "random"):
