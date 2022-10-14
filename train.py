@@ -43,12 +43,12 @@ for epoch in range(train_config.epoch):
         
         concept = [t[0] for t in raw_concept]
 
-        logp = model(concept,image,path)
+        recons,logp = model(concept,image,path)
         total_loss -= logp
     
     print(total_loss)
     # calculate all the gradient and do a REINFORCE
     con_optimizer.zero_grad()
     total_loss.backward(retain_graph = True)
-    con_optimizer.step()
+    con_optimizer.step();plt.cla()
 

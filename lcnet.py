@@ -37,24 +37,23 @@ class LCNet(nn.Module):
         self.net_data = 0
         
         # the embeeding 
-        self.conv1  =  GCNConv(64, 64)
-        self.conv2  =  GCNConv(64, 64)
-        self.conv3  =  GCNConv(64, 64)
+        self.conv1  =  GCNConv(64,  128)
+        self.conv2  =  GCNConv(128, 128)
+        self.conv3  =  GCNConv(128, 64)
         # use the graph convolution to map the data from the point and circle
         self.line_mapper    = FCBlock(132,3,4,64)
         self.circle_mapper  = FCBlock(132,3,3,64)
 
     def forward(self,data):
         x, edge_index = data.x, data.edges
-        return x
+        #return x
         #print(x.shape)
         x_0 = F.celu(self.conv1(x, edge_index))
         #x = F.dropout(x,training = True)
         
         x_1 = F.celu(self.conv2(x_0, edge_index))
-        x_1 = F.celu(x)
         #x = F.dropout(x,training = True)
-        
+
         x_2 = self.conv3(x_1,edge_index)
 
         return F.celu(x_2)
@@ -74,10 +73,10 @@ class LCNet(nn.Module):
                 if not flag and same_line(self.lines[k],line):flag = True # for each line deteced, if it is a new line, add it into the diction.
             if not flag:
                 self.line_count += 1;self.lines["l{}".format(self.line_count)] = line
-                #print(line)
+
                 line_feature    =  self.line_mapper(torch.cat([torch.tensor(line[0]),torch.tensor(line[1])],-1).float()).unsqueeze(0)
                 x.append(line_feature)
-                #self.line_embeddings["l{}".format(self.line_count)] = line_feature
+
         for circle in circles:
             flag = False # the flag for is there is at least one circle the same circle with the new circle
             for k in self.circles:
@@ -89,24 +88,27 @@ class LCNet(nn.Module):
                 x.append(circle_feature)
                 #self.circle_embeddings["c{}".format(self.circle_count)] = circle_feature
 
-        x = torch.cat(x,0)
+        d = torch.cat(x,0)
         connect_edges = torch.tensor([
             [1,2],
             [2,3],
         ],dtype = torch.long)
         connect_edges = connect_edges.t().contiguous()
 
-        return Data(x = x,edges = connect_edges)
+        return Data(x = d,edges = connect_edges)
 
     def realize_lc(self,data):
         output = self.forward(data)
 
-        lines = [[],[]];circles = [[],[]]
+        lines = [[],output];circles = [[],[]]
         for i in range(self.line_count):
-            lines[0].append("l{}".format(i + 1));lines[1].append(output[i])
+            lines[0].append("l{}".format(i + 1));
+            #lines[1].append(output[i:i+1])
         for i in range(self.circle_count):
             circles[0].append("c{}".format(i + 1));circles[1].append(output[i + self.line_count - 1])
         return lines,circles
+
+
 """
 edge_index = torch.tensor([[0, 1],
                            [1, 0],

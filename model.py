@@ -30,6 +30,6 @@ class GCL(nn.Module):
         lines,circles = lcnet.realize_lc(data) # propgate to get the embedding according to the relations.
 
         # the reconstruction and the logp of that reconstruction
-        recons,logp =   constructor.construct(lines,circles)
+        recons,logp =   constructor.construct(lines,circles,lcnet.lines,lcnet.circles)
 
-        return logp
+        return recons,logp

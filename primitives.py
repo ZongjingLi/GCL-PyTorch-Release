@@ -327,6 +327,8 @@ class GeometricConstructor(nn.Module):
 
         self.clear()
 
+        self.ID = nn.Linear(64,64)
+
     def clear(self):
         self.realized  = False # clear the state of dag and the realization
         self.structure = None  # clear the state of cocnept structure 
@@ -415,27 +417,31 @@ class GeometricConstructor(nn.Module):
         self.downward_memory = downward_memory_storage
         return 
     
-    def construct(self,lines,circles,mode = "train"):
+    def construct(self,lines,circles,lmap,cmap,mode = "train"):
         # lcnet provides a set of lines and circles with embeddings
+
         line_features   = lines # embeddings with a diction
         circle_features = circles # embeddings with a diction
-
         realized_visibles = []
+        self.construction_logp = 0
         def build_node(node):
             if node not in self.visible:return
             if ptype(node) == "point":return
             feature = torch.cat([self.upward_memory[node],self.downward_memory[node]],-1)
             if ptype(node) == "line":
                 if mode == "train":
+                    #pdf = torch.softmax(torch.cosine_similarity(feature,line_features[1])* 5,0)
+                    #self.construction_logp += torch.log(pdf[0])
                     choice,p = make_pdf(feature,line_features);self.construction_logp += torch.log(p)
-                    #line_params = lines[choice]
+                    line_params = lmap[choice]
+
                 else:
                     choice = make_pdf(feature,line_features);self.construction_logp += torch.log(p)
                     #line_params = lines[choice]
             if ptype(node) == "circle":
                 if mode == "train":
                     choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
-                    #circle_params = circles[choice]
+                    circle_params = cmap[choice]
                 else:
                     choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
                     #circle_params = circles[choice]
@@ -443,8 +449,7 @@ class GeometricConstructor(nn.Module):
         return 0,self.construction_logp
 
 def make_pdf(source,choices,mode = "random"):
-    features = torch.cat([k.unsqueeze(0) for k in choices[1]],0)
-
+    features =  choices[1]
     keys = choices[0]
 
     pdf = torch.softmax(torch.cosine_similarity(features,source)* 5,0)
