@@ -55,7 +55,7 @@ class LCNet(nn.Module):
         x = F.dropout(x,training = True)
         
         x = self.conv3(x,edge_index)
-        print(x.shape)
+
         return F.celu(x)
 
     def build_dag_lc(self,lines,circles):
@@ -99,8 +99,12 @@ class LCNet(nn.Module):
 
     def realize_lc(self):
         x = self.net_data
-        return self.forward(x)
-
+        output = self.forward(x)
+        for i in range(self.line_count):
+            self.line_embeddings["l{}".format(i + 1)] = output[i]
+        for i in range(self.circle_count):
+            self.circle_embeddings["c{}".format(i + 1)] = output[i]
+        
 """
 edge_index = torch.tensor([[0, 1],
                            [1, 0],

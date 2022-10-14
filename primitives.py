@@ -309,7 +309,7 @@ class GeometricConstructor(nn.Module):
         self.structure = None
         self.visisble = []
         self.global_feature = None
-        self.constrution_logp = 0 # the log prob of a configuruation is created.
+        self.construction_logp = 0 # the log prob of a configuruation is created.
 
         # this is the feature propagator for upward and downward quest
         self.line_propagator = FCBlock(132,3,opt.latent_dim * 2, opt.latent_dim)
@@ -430,29 +430,32 @@ class GeometricConstructor(nn.Module):
             feature = torch.cat([self.upward_memory[node],self.downward_memory[node]],-1)
             if ptype(node) == "line":
                 if mode == "train":
-                    choice = make_pdf(feature,line_features)
+                    choice,p = make_pdf(feature,line_features);self.construction_logp += torch.log(p)
                     line_params = lines[choice]
                 else:
-                    choice = make_pdf(feature,line_features)
+                    choice = make_pdf(feature,line_features);self.construction_logp += torch.log(p)
                     line_params = lines[choice]
             if ptype(node) == "circle":
                 if mode == "train":
-                    choice = make_pdf(feature,circle_features)
+                    choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
                     circle_params = circles[choice]
                 else:
-                    choice = make_pdf(feature,circle_features)
+                    choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
                     circle_params = circles[choice]
         for node in self.structure.nodes:build_node(node)
-        return 0
+        return 0,self.construction_logp
 
 def make_pdf(source,choices,mode = "random"):
-    features = torch.cat([choices[k] for k in choices],-1)
+    features = torch.cat([choices[k].unsqueeze(0) for k in choices],0)
+
     pdf = torch.softmax(torch.cosine_similarity(features,source)* 5,0)
+    #print(pdf)
     if mode == "random":
-        return np.random.choice(choices.keys(),p = pdf)
+        index = np.random.choice(range(len(choices.keys())),p = pdf.detach().numpy())
+        return list(choices.keys())[index],pdf[index]
     else:
         index = np.argmax(pdf.detach().numpy())
-        return choices.keys()[index]
+        return choices.keys()[index],pdf[index]
 
 def numpy_from_plot(ax):
     ax.figure.canvas.draw()

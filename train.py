@@ -32,10 +32,11 @@ con_optimizer = torch.optim.Adam(constructor.parameters(), lr = 2e-4)
 lc_optimizer  = torch.optim.Adam(lcnet.parameters(), lr = 2e-4)
 
 for epoch in range(train_config.epoch):
-    total_loss = 0
+    
     # clear the gradient and reset the loss
     con_optimizer.zero_grad()
     lc_optimizer.zero_grad()
+    total_loss = 0
 
     for sample in train_loader:
         raw_concept,image,path = sample["concept"],sample["image"],sample["path"]
@@ -58,9 +59,12 @@ for epoch in range(train_config.epoch):
 
         # the reconstruction and the logp of that reconstruction
         recons,logp =   constructor.construct(lcnet)
-        total_loss  +=  logp * BCELoss(recons,image) # the reinforce loss, the prob of a recon and the loss of that recon.
-
+        print(logp)
+        total_loss  -=  logp * 1 # BCELoss(recons,image) # the reinforce loss, the prob of a recon and the loss of that recon.
+    
+    print(total_loss)
     # calculate all the gradient and do a REINFORCE
     total_loss.backward()
     con_optimizer.step()
     lc_optimizer.step()
+    
