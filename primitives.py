@@ -496,7 +496,7 @@ def plot_object(ax, obj, color="black"):
     if isinstance(obj, Polygon):
         obj = obj.exterior
     x, y = obj.xy
-    ax.plot(x, y, linewidth=5, color=color)
+    ax.plot(x, y, linewidth=3, color=color)
     return ax
 
 
