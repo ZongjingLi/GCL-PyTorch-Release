@@ -39,13 +39,15 @@ class LCNet(nn.Module):
         # the embeeding 
         self.conv1  =  GCNConv(64, 64)
         self.conv2  =  GCNConv(64, 64)
-        self.conv3  =  GCNConv(64, 32)
+        self.conv3  =  GCNConv(64, 64)
         # use the graph convolution to map the data from the point and circle
         self.line_mapper    = FCBlock(132,3,4,64)
         self.circle_mapper  = FCBlock(132,3,3,64)
 
     def forward(self,data):
         x, edge_index = data.x, data.edges
+        return x
+        #print(x.shape)
         x_0 = F.celu(self.conv1(x, edge_index))
         #x = F.dropout(x,training = True)
         
