@@ -75,7 +75,8 @@ class LCNet(nn.Module):
             if not flag:
                 self.line_count += 1;self.lines["l{}".format(self.line_count)] = line
                 #print(line)
-                line_feature    =  self.line_mapper(torch.cat([torch.tensor(line[0]),torch.tensor(line[1])],-1).float());x.append(line_feature)
+                line_feature    =  self.line_mapper(torch.cat([torch.tensor(line[0]),torch.tensor(line[1])],-1).float()).unsqueeze(0)
+                x.append(line_feature)
                 self.line_embeddings["l{}".format(self.line_count)] = line_feature
         for circle in circles:
             flag = False # the flag for is there is at least one circle the same circle with the new circle
@@ -84,13 +85,17 @@ class LCNet(nn.Module):
             if not flag:
                 self.circle_count += 1;self.circles["c{}".format(self.circle_count)] = circle
                 print(circle)
-                circle_feature    =  self.circle_mapper(torch.tensor(circle).float());x.append(circle_feature)
+                circle_feature    =  self.circle_mapper(torch.tensor(circle).float()).unsqueeze(0)
+                x.append(circle_feature)
                 self.circle_embeddings["c{}".format(self.circle_count)] = circle_feature
-        print(x[0].shape)
-        x = torch.cat(x,-1)
-        edges = []
-        print(x.shape)
-        self.net_data = Data(x = x,edges = edges)
+
+        x = torch.cat(x,0)
+        edges = torch.tensor([
+            [1,2],
+            [2,3],
+        ],dtype = torch.long)
+
+        self.net_data = Data(x = x,edges = edges.t().contiguous())
         return 0
 
     def realize_lc(self):
