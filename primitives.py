@@ -446,9 +446,9 @@ class GeometricConstructor(nn.Module):
                     choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
                     #circle_params = circles[choice]
         for node in self.structure.nodes:build_node(node)
-        plt.figure("recon")
+        plt.figure("example");plt.subplot(122);plt.cla()
         for obj  in realized_visibles:plot_object(obj)
-        plt.pause(0.0001)
+        #plt.pause(0.0001);plt.cla()
         return 0,self.construction_logp
 
 def make_pdf(source,choices,mode = "random"):

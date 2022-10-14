@@ -31,7 +31,7 @@ dataset = GeometricElementsData("train","angle") # the geometric concept dataset
 train_loader = DataLoader(dataset, batch_size = 1, shuffle = True)
 
 # the Adam optimizer for the constuctor and lcnet
-con_optimizer = torch.optim.Adam(model.parameters(), lr = 2e-4)
+con_optimizer = torch.optim.Adam(model.parameters(), lr = 2e-4);plt.ion()
 
 for epoch in range(train_config.epoch):
     
@@ -45,6 +45,7 @@ for epoch in range(train_config.epoch):
 
         recons,logp = model(concept,image,path)
         total_loss -= logp
+        plt.pause(0.01)
     
     print(total_loss)
     # calculate all the gradient and do a REINFORCE
