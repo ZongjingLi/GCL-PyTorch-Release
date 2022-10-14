@@ -415,13 +415,10 @@ class GeometricConstructor(nn.Module):
         self.downward_memory = downward_memory_storage
         return 
     
-    def construct(self,lcnet,mode = "train"):
+    def construct(self,lines,circles,mode = "train"):
         # lcnet provides a set of lines and circles with embeddings
-        line_features   = lcnet.line_embeddings # embeddings with a diction
-        circle_features = lcnet.circle_embeddings # embeddings with a diction
-
-        lines  = lcnet.lines
-        circles = lcnet.circles
+        line_features   = lines # embeddings with a diction
+        circle_features = circles # embeddings with a diction
 
         realized_visibles = []
         def build_node(node):
@@ -431,31 +428,33 @@ class GeometricConstructor(nn.Module):
             if ptype(node) == "line":
                 if mode == "train":
                     choice,p = make_pdf(feature,line_features);self.construction_logp += torch.log(p)
-                    line_params = lines[choice]
+                    #line_params = lines[choice]
                 else:
                     choice = make_pdf(feature,line_features);self.construction_logp += torch.log(p)
-                    line_params = lines[choice]
+                    #line_params = lines[choice]
             if ptype(node) == "circle":
                 if mode == "train":
                     choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
-                    circle_params = circles[choice]
+                    #circle_params = circles[choice]
                 else:
                     choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
-                    circle_params = circles[choice]
+                    #circle_params = circles[choice]
         for node in self.structure.nodes:build_node(node)
         return 0,self.construction_logp
 
 def make_pdf(source,choices,mode = "random"):
-    features = torch.cat([choices[k].unsqueeze(0) for k in choices],0)
+    features = torch.cat([k.unsqueeze(0) for k in choices[1]],0)
+
+    keys = choices[0]
 
     pdf = torch.softmax(torch.cosine_similarity(features,source)* 5,0)
     #print(pdf)
     if mode == "random":
-        index = np.random.choice(range(len(choices.keys())),p = pdf.detach().numpy())
-        return list(choices.keys())[index],pdf[index]
+        index = np.random.choice(range(len(keys)),p = pdf.detach().numpy())
+        return keys[index],pdf[index]
     else:
         index = np.argmax(pdf.detach().numpy())
-        return choices.keys()[index],pdf[index]
+        return keys[index],pdf[index]
 
 def numpy_from_plot(ax):
     ax.figure.canvas.draw()

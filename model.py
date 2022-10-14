@@ -27,9 +27,9 @@ class GCL(nn.Module):
         lines,circles = detect_lines_and_circles(path[0])
 
         data = lcnet.build_dag_lc(lines,circles) # use the lc net to create the connection graph
-        lcnet.realize_lc(data) # propgate to get the embedding according to the relations.
+        lines,circles = lcnet.realize_lc(data) # propgate to get the embedding according to the relations.
 
         # the reconstruction and the logp of that reconstruction
-        recons,logp =   constructor.construct(lcnet)
+        recons,logp =   constructor.construct(lines,circles)
 
         return logp

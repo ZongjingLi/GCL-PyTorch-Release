@@ -100,13 +100,13 @@ class LCNet(nn.Module):
 
     def realize_lc(self,data):
         output = self.forward(data)
-        self.line_embeddings = {}
-        self.circle_embeddings = {}
+
+        lines = [[],[]];circles = [[],[]]
         for i in range(self.line_count):
-            self.line_embeddings["l{}".format(i + 1)] = output[i]
+            lines[0].append("l{}".format(i + 1));lines[1].append(output[i])
         for i in range(self.circle_count):
-            self.circle_embeddings["c{}".format(i + 1)] = output[i]
-        
+            circles[0].append("c{}".format(i + 1));circles[1].append(output[i + self.line_count - 1])
+        return lines,circles
 """
 edge_index = torch.tensor([[0, 1],
                            [1, 0],
