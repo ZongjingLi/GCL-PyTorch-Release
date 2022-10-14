@@ -1,3 +1,4 @@
+
 import torch
 import torch.nn as nn
 
@@ -7,6 +8,7 @@ from datasets import *
 from detection import *
 from primitives import *
 from lcnet import *
+from model import *
 from config import *
 
 train_parser = argparse.ArgumentParser()
@@ -21,50 +23,30 @@ BCELoss = torch.nn.BCELoss(reduction = "mean")
 
 visualize = True
 
-constructor = GeometricConstructor() # the geometric concept encoder 
-lcnet = LCNet() # the encoder of lines and circles
+model = GCL(model_opt)
 
 dataset = GeometricElementsData("train","angle") # the geometric concept dataset for training
 train_loader = DataLoader(dataset, batch_size = 1, shuffle = True)
 
 # the Adam optimizer for the constuctor and lcnet
-con_optimizer = torch.optim.Adam(constructor.parameters(), lr = 2e-4)
-lc_optimizer  = torch.optim.Adam(lcnet.parameters(), lr = 2e-4)
+con_optimizer = torch.optim.Adam(model.parameters(), lr = 2e-4)
 
 for epoch in range(train_config.epoch):
     
     # clear the gradient and reset the loss
-    con_optimizer.zero_grad()
-    lc_optimizer.zero_grad()
     total_loss = 0
 
     for sample in train_loader:
         raw_concept,image,path = sample["concept"],sample["image"],sample["path"]
         
         concept = [t[0] for t in raw_concept]
-        # realize the concept using the geometric constructor
-        constructor.build_dag(concept)
-        constructor.realize(torch.zeros([1,128]))
 
-        if visualize:
-            plt.figure("example");plt.cla();plt.imshow(image[0][0],cmap = "bone")
-            plt.figure("concept");plt.cla();nx.draw_networkx(constructor.structure)
-        plt.pause(1)
-        # detect visible components (line and circles) from the image
-
-        lines,circles = detect_lines_and_circles(path[0])
-
-        lcnet.build_dag_lc(lines,circles) # use the lc net to create the connection graph
-        lcnet.realize_lc() # propgate to get the embedding according to the relations.
-
-        # the reconstruction and the logp of that reconstruction
-        recons,logp =   constructor.construct(lcnet)
-        print(logp)
-        total_loss  -=  logp * 1 # BCELoss(recons,image) # the reinforce loss, the prob of a recon and the loss of that recon.
+        logp = model(concept,image,path)
+        total_loss -= logp
     
     print(total_loss)
     # calculate all the gradient and do a REINFORCE
+    con_optimizer.zero_grad()
     total_loss.backward()
     con_optimizer.step()
-    lc_optimizer.step()
-    
+
