@@ -45,7 +45,7 @@ for epoch in range(train_config.epoch):
 
         recons,logp = model(concept,image,path)
         total_loss -= logp
-        plt.pause(0.01)
+        plt.pause(1)
     
     print(total_loss)
     # calculate all the gradient and do a REINFORCE
