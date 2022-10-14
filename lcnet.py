@@ -37,8 +37,8 @@ class LCNet(nn.Module):
         self.net_data = 0
         
         # the embeeding 
-        self.conv1  =  GCNConv(64, 32)
-        self.conv2  =  GCNConv(32, 64)
+        self.conv1  =  GCNConv(64, 64)
+        self.conv2  =  GCNConv(64, 64)
         self.conv3  =  GCNConv(64, 32)
         # use the graph convolution to map the data from the point and circle
         self.line_mapper    = FCBlock(132,3,4,64)
@@ -46,17 +46,16 @@ class LCNet(nn.Module):
 
     def forward(self,data):
         x, edge_index = data.x, data.edges
-        x = self.conv1(x, edge_index)
-        x = F.celu(x)
-        x = F.dropout(x,training = True)
-
-        x = self.conv2(x, edge_index)
-        x = F.celu(x)
-        x = F.dropout(x,training = True)
+        x_0 = F.celu(self.conv1(x, edge_index))
+        #x = F.dropout(x,training = True)
         
-        x = self.conv3(x,edge_index)
+        x_1 = F.celu(self.conv2(x_0, edge_index))
+        x_1 = F.celu(x)
+        #x = F.dropout(x,training = True)
+        
+        x_2 = self.conv3(x_1,edge_index)
 
-        return F.celu(x)
+        return F.celu(x_2)
 
     def build_dag_lc(self,lines,circles):
         self.line_count   = 0
@@ -76,7 +75,7 @@ class LCNet(nn.Module):
                 #print(line)
                 line_feature    =  self.line_mapper(torch.cat([torch.tensor(line[0]),torch.tensor(line[1])],-1).float()).unsqueeze(0)
                 x.append(line_feature)
-                self.line_embeddings["l{}".format(self.line_count)] = line_feature
+                #self.line_embeddings["l{}".format(self.line_count)] = line_feature
         for circle in circles:
             flag = False # the flag for is there is at least one circle the same circle with the new circle
             for k in self.circles:
@@ -86,20 +85,19 @@ class LCNet(nn.Module):
                 print(circle)
                 circle_feature    =  self.circle_mapper(torch.tensor(circle).float()).unsqueeze(0)
                 x.append(circle_feature)
-                self.circle_embeddings["c{}".format(self.circle_count)] = circle_feature
+                #self.circle_embeddings["c{}".format(self.circle_count)] = circle_feature
 
         x = torch.cat(x,0)
         connect_edges = torch.tensor([
             [1,2],
+            [2,3],
         ],dtype = torch.long)
         connect_edges = connect_edges.t().contiguous()
 
-        self.net_data = Data(x = x,edges = connect_edges)
-        return self.net_data
+        return Data(x = x,edges = connect_edges)
 
-    def realize_lc(self):
-        x = self.net_data
-        output = self.forward(x)
+    def realize_lc(self,data):
+        output = self.forward(data)
         for i in range(self.line_count):
             self.line_embeddings["l{}".format(i + 1)] = output[i]
         for i in range(self.circle_count):

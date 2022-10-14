@@ -11,6 +11,8 @@ from lcnet import *
 from model import *
 from config import *
 
+torch.autograd.set_detect_anomaly(True)
+
 train_parser = argparse.ArgumentParser()
 train_parser.add_argument("--epoch", default = 9999, type = int, help = "the default trainingepoch for the model")
 train_parser.add_argument("--lr", default = 2e-4, type = float, help = "the learning rate for the optimizer")
@@ -47,6 +49,6 @@ for epoch in range(train_config.epoch):
     print(total_loss)
     # calculate all the gradient and do a REINFORCE
     con_optimizer.zero_grad()
-    total_loss.backward()
+    total_loss.backward(retain_graph = True)
     con_optimizer.step()
 
