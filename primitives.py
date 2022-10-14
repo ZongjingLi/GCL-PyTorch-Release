@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 from shapely.geometry import Point, Polygon, LineString, MultiPoint, MultiLineString
 
 from config import *
+from geoclidean_framework.plot_utils import initial_plot
 
 BCELoss= nn.BCELoss(reduction = "mean")
 
@@ -424,6 +425,8 @@ class GeometricConstructor(nn.Module):
         circle_features = circles # embeddings with a diction
         realized_visibles = []
         self.construction_logp = 0
+
+        initial_plot()
         def build_node(node):
             if node not in self.visible:return
             if ptype(node) == "point":return
