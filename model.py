@@ -16,12 +16,7 @@ class GCL(nn.Module):
         lcnet = self.lcnet
         # realize the concept using the geometric constructor
         constructor.build_dag(concept)
-        constructor.realize(torch.zeros([1,128]))
-
-        if visualize:
-            plt.figure("example");plt.subplot(121);plt.cla();plt.imshow(image[0][0],cmap = "bone")
-            #plt.figure("concept");plt.cla();nx.draw_networkx(constructor.structure)
-        
+        constructor.realize(torch.zeros([1,128]))        
         # detect visible components (line and circles) from the image
 
         lines,circles = detect_lines_and_circles(path[0])
@@ -31,5 +26,11 @@ class GCL(nn.Module):
 
         # the reconstruction and the logp of that reconstruction
         recons,logp =   constructor.construct(lines,circles,lcnet.lines,lcnet.circles)
+        recons = recons[:,:,0]
+        print(recons.shape)
+        if visualize:
+            plt.figure("example");plt.subplot(121);plt.cla();plt.imshow(image[0][0],cmap = "bone")
+            plt.subplot(122);plt.cla();plt.imshow(recons,cmap = "bone")
+            #plt.figure("concept");plt.cla();nx.draw_networkx(constructor.structure)
 
         return recons,logp

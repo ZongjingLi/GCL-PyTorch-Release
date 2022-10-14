@@ -425,8 +425,7 @@ class GeometricConstructor(nn.Module):
         circle_features = circles # embeddings with a diction
         realized_visibles = []
         self.construction_logp = 0
-
-        initial_plot()
+        current_plot = initial_plot()
         def build_node(node):
             if node not in self.visible:return
             if ptype(node) == "point":return
@@ -449,10 +448,12 @@ class GeometricConstructor(nn.Module):
                     choice,p = make_pdf(feature,circle_features);self.construction_logp += torch.log(p)
                     #circle_params = circles[choice]
         for node in self.structure.nodes:build_node(node)
-        plt.figure("example");plt.subplot(122);plt.cla()
-        for obj  in realized_visibles:plot_object(obj)
+
+        for obj  in realized_visibles:current_plot = plot_object(current_plot, obj)
         #plt.pause(0.0001);plt.cla()
-        return 0,self.construction_logp
+        out = numpy_from_plot(current_plot)
+        plt.close()
+        return out,self.construction_logp
 
 def make_pdf(source,choices,mode = "random"):
     features =  choices[1]
@@ -467,6 +468,19 @@ def make_pdf(source,choices,mode = "random"):
         index = np.argmax(pdf.detach().numpy())
         return keys[index],pdf[index]
 
+import matplotlib.ticker as plticker
+
+def initial_plot():
+    loc = plticker.MultipleLocator(base=1.0)
+
+    fig = plt.figure(figsize=(3.6, 3.6))
+    ax = fig.add_subplot(111)
+    ax.xaxis.set_major_locator(loc)
+    ax.yaxis.set_major_locator(loc)
+    ax.axis('equal')
+    ax.axis('off') 
+    return ax
+
 def numpy_from_plot(ax):
     ax.figure.canvas.draw()
     data = np.frombuffer(ax.figure.canvas.tostring_rgb(), dtype=np.uint8)
@@ -474,11 +488,12 @@ def numpy_from_plot(ax):
     im = data.reshape((int(h), int(w), -1))
     return im
 
-def plot_object(obj, color="black"):
+def plot_object(ax, obj, color="black"):
     if isinstance(obj, Polygon):
         obj = obj.exterior
     x, y = obj.xy
-    plt.plot(x, y, linewidth=3, color=color)
+    ax.plot(x, y, linewidth=3, color=color)
+    return ax
 
 
 if __name__ == "__main__":
