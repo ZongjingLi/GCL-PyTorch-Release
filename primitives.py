@@ -406,9 +406,9 @@ class GeometricConstructor(nn.Module):
             if node in downward_memory_storage:return downward_memory_storage[node]# if node already calculated, nothing happens
             connect_to     =  find_connection(node,self.structure,loc = 0) # find all the nodes that connected to the current node
 
-            input_neighbors = [quest_up(p_node) for p_node in connect_to]
+            input_neighbors      = [quest_up(p_node) for p_node in connect_to]
             current_node_feature = self.upward_memory[node] # this is the feature a point store currently (circle,point,line aware)
-            update_component = self.message_propagator(current_node_feature,input_neighbors) # this is the update component feature
+            update_component     = self.message_propagator(current_node_feature,input_neighbors) # this is the update component feature
         
             downward_memory_storage[node] = update_component 
             return update_component
@@ -451,6 +451,7 @@ class GeometricConstructor(nn.Module):
 
         for obj  in realized_visibles:current_plot = plot_object(current_plot, obj)
         #plt.pause(0.0001);plt.cla()
+        plt.show()
         out = numpy_from_plot(current_plot)
         plt.close()
         return out,self.construction_logp
@@ -473,7 +474,7 @@ import matplotlib.ticker as plticker
 def initial_plot():
     loc = plticker.MultipleLocator(base=1.0)
 
-    fig = plt.figure(figsize=(3.6, 3.6))
+    fig = plt.figure(figsize=(3.6/2, 3.6/2))
     ax = fig.add_subplot(111)
     ax.xaxis.set_major_locator(loc)
     ax.yaxis.set_major_locator(loc)
@@ -482,17 +483,20 @@ def initial_plot():
     return ax
 
 def numpy_from_plot(ax):
+
     ax.figure.canvas.draw()
+    
     data = np.frombuffer(ax.figure.canvas.tostring_rgb(), dtype=np.uint8)
-    w, h = ax.figure.canvas.get_width_height()
-    im = data.reshape((int(h), int(w), -1))
+    #w, h = ax.figure.canvas.get_width_height()
+    im = data.reshape(360,360,-1)
+    #data.reshape((int(h), int(w), -1))
     return im
 
 def plot_object(ax, obj, color="black"):
     if isinstance(obj, Polygon):
         obj = obj.exterior
     x, y = obj.xy
-    ax.plot(x, y, linewidth=3, color=color)
+    ax.plot(x, y, linewidth=5, color=color)
     return ax
 
 

@@ -26,11 +26,11 @@ class GCL(nn.Module):
 
         # the reconstruction and the logp of that reconstruction
         recons,logp =   constructor.construct(lines,circles,lcnet.lines,lcnet.circles)
-        recons = recons[:,:,0]
-        print(recons.shape)
+        recons = recons[:,:,-1]
+
         if visualize:
-            plt.figure("example");plt.subplot(121);plt.cla();plt.imshow(image[0][0],cmap = "bone")
-            plt.subplot(122);plt.cla();plt.imshow(recons,cmap = "bone")
+            plt.figure("example");plt.subplot(221);plt.cla();plt.imshow(image[0][0],cmap = "bone")
+            plt.subplot(222);plt.cla();plt.imshow(recons,cmap = "bone")
             #plt.figure("concept");plt.cla();nx.draw_networkx(constructor.structure)
 
         return recons,logp
