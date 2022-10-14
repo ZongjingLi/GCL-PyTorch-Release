@@ -74,7 +74,8 @@ class LCNet(nn.Module):
                 if not flag and same_line(self.lines[k],line):flag = True # for each line deteced, if it is a new line, add it into the diction.
             if not flag:
                 self.line_count += 1;self.lines["l{}".format(self.line_count)] = line
-                line_feature    =  self.line_mapper(line);x.append(line_feature)
+                #print(line)
+                line_feature    =  self.line_mapper(torch.cat([torch.tensor(line[0]),torch.tensor(line[1])],-1).float());x.append(line_feature)
                 self.line_embeddings["l{}".format(self.line_count)] = line_feature
         for circle in circles:
             flag = False # the flag for is there is at least one circle the same circle with the new circle
@@ -82,10 +83,13 @@ class LCNet(nn.Module):
                 if not flag and same_circle(self.circles[k],circle):flag = True # for each circle detected, if it is a new circle, added into the diction.
             if not flag:
                 self.circle_count += 1;self.circles["c{}".format(self.circle_count)] = circle
-                circle_feature    =  self.circle_mapper(circle);x.append(circle_feature)
+                print(circle)
+                circle_feature    =  self.circle_mapper(torch.tensor(circle).float());x.append(circle_feature)
                 self.circle_embeddings["c{}".format(self.circle_count)] = circle_feature
+        print(x[0].shape)
         x = torch.cat(x,-1)
         edges = []
+        print(x.shape)
         self.net_data = Data(x = x,edges = edges)
         return 0
 
