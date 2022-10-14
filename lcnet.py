@@ -45,8 +45,7 @@ class LCNet(nn.Module):
         self.circle_mapper  = FCBlock(132,3,3,64)
 
     def forward(self,data):
-        x, edge_index = data.x, data.edge_index
-
+        x, edge_index = data.x, data.edges
         x = self.conv1(x, edge_index)
         x = F.celu(x)
         x = F.dropout(x,training = True)
@@ -56,7 +55,7 @@ class LCNet(nn.Module):
         x = F.dropout(x,training = True)
         
         x = self.conv3(x,edge_index)
-
+        print(x.shape)
         return F.celu(x)
 
     def build_dag_lc(self,lines,circles):
@@ -90,13 +89,13 @@ class LCNet(nn.Module):
                 self.circle_embeddings["c{}".format(self.circle_count)] = circle_feature
 
         x = torch.cat(x,0)
-        edges = torch.tensor([
+        connect_edges = torch.tensor([
             [1,2],
-            [2,3],
         ],dtype = torch.long)
+        connect_edges = connect_edges.t().contiguous()
 
-        self.net_data = Data(x = x,edges = edges.t().contiguous())
-        return 0
+        self.net_data = Data(x = x,edges = connect_edges)
+        return self.net_data
 
     def realize_lc(self):
         x = self.net_data
