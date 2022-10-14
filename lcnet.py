@@ -100,6 +100,8 @@ class LCNet(nn.Module):
 
     def realize_lc(self,data):
         output = self.forward(data)
+        self.line_embeddings = {}
+        self.circle_embeddings = {}
         for i in range(self.line_count):
             self.line_embeddings["l{}".format(i + 1)] = output[i]
         for i in range(self.circle_count):
