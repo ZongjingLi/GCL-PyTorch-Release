@@ -73,8 +73,9 @@ class LCNet(nn.Module):
                 if not flag and same_line(self.lines[k],line):flag = True # for each line deteced, if it is a new line, add it into the diction.
             if not flag:
                 self.line_count += 1;self.lines["l{}".format(self.line_count)] = line
-
+                
                 line_feature    =  self.line_mapper(torch.cat([torch.tensor(line[0]),torch.tensor(line[1])],-1).float()).unsqueeze(0)
+
                 x.append(line_feature)
 
         for circle in circles:
@@ -83,15 +84,17 @@ class LCNet(nn.Module):
                 if not flag and same_circle(self.circles[k],circle):flag = True # for each circle detected, if it is a new circle, added into the diction.
             if not flag:
                 self.circle_count += 1;self.circles["c{}".format(self.circle_count)] = circle
-                print(circle)
-                circle_feature    =  self.circle_mapper(torch.tensor(circle).float()).unsqueeze(0)
+
+                circle_feature    =  self.circle_mapper(torch.tensor([float(a) for a in circle]).float()).unsqueeze(0)
+
                 x.append(circle_feature)
                 #self.circle_embeddings["c{}".format(self.circle_count)] = circle_feature
 
         d = torch.cat(x,0)
+
         connect_edges = torch.tensor([
             [1,2],
-            [2,3],
+            [2,0],
         ],dtype = torch.long)
         connect_edges = connect_edges.t().contiguous()
 
@@ -100,12 +103,12 @@ class LCNet(nn.Module):
     def realize_lc(self,data):
         output = self.forward(data)
 
-        lines = [[],output];circles = [[],[]]
+        lines = [[],output[:self.line_count]];circles = [[],output[self.line_count:]]
         for i in range(self.line_count):
             lines[0].append("l{}".format(i + 1));
             #lines[1].append(output[i:i+1])
         for i in range(self.circle_count):
-            circles[0].append("c{}".format(i + 1));circles[1].append(output[i + self.line_count - 1])
+            circles[0].append("c{}".format(i + 1));
         return lines,circles
 
 
