@@ -92,10 +92,9 @@ class LCNet(nn.Module):
 
         d = torch.cat(x,0)
 
-        connect_edges = torch.tensor([
-            [1,2],
-            [2,0],
-        ],dtype = torch.long)
+        edges_list = []
+
+        connect_edges = torch.tensor(edges_list,dtype = torch.long)
         connect_edges = connect_edges.t().contiguous()
 
         return Data(x = d,edges = connect_edges)

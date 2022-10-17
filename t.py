@@ -1,5 +1,0 @@
-f = open("lettes.txt")
-info = f.readline()
-info = f.readline()
-print(info[0])
-f.close()
