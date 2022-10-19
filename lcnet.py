@@ -14,13 +14,14 @@ from config import *
 eps = 5
 
 def L2Norm(x,y):
-    if x is not torch.tensor: x = torch.tensor(x)
-    if y is not torch.tensor: y = torch.tensor(y)
+    if x is not torch.tensor: x = torch.tensor(float(x))
+    if y is not torch.tensor: y = torch.tensor(float(y))
     return torch.sqrt(x*x + y*y)
 
 def same_circle(a,b):
     x1,y1,r1 = a; x2,y2,r2 = b
-    if L2Norm(x1-x2,y1-y2) > eps or torch.abs(r1-r2)> eps:return False
+    if L2Norm(x1-x2,y1-y2) > eps or \
+    torch.abs(torch.tensor(float(r1))-torch.tensor(float(r2)))> eps:return False
     return True
 
 def same_line(a,b):
@@ -107,12 +108,12 @@ class LCNet(nn.Module):
 
         d = torch.cat(x,0)
 
-        edges_list = [[0,1]]
+        edges_list = [[0,0]]
         for k in self.lines:
             line = self.lines[k]
         for k in self.circles:
             circle = self.circles[k]
-
+        print(self.lines,self.circles)
         connect_edges = torch.tensor(edges_list,dtype = torch.long)
         connect_edges = connect_edges.t().contiguous()
 
