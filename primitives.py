@@ -460,7 +460,7 @@ def make_pdf(source,choices,mode = "random"):
     features =  choices[1]
     keys = choices[0]
 
-    pdf = torch.softmax(torch.cosine_similarity(features,source)* 5,0)
+    pdf = torch.softmax(torch.cosine_similarity(features,source)* 5.0,0)
     #print(keys,features.shape,pdf.shape)
     #print(pdf)
     if mode == "random":

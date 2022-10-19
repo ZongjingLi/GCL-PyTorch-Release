@@ -122,7 +122,7 @@ def detect_lines_and_circles(image_path):
     if detected_lines is not None:
         for line in detected_lines:
             x1, y1, x2, y2 = line[0]
-            cv2.line(img, (x1, 360), (x2, 360), (0, 0, 256), 2)
+            cv2.line(img, (x1, y1), (x2, y2), (0, 0, 256), 2)
             output_lines.append([(x1,360-y1),(x2,360-y2)])
 
     #cv2.imshow("Detected Lines",img)
@@ -139,14 +139,15 @@ def detect_lines_and_circles(image_path):
         # namomo, adjust lines
         for pt in detected_circles[0, :]:
             a, b, r = pt[0], pt[1], pt[2]
-            b = 360 - b
+            b = b
             # Draw the circumference of the circle.
             cv2.circle(img, (a, b), r, (0, 255, 0), 3)
   
             # Draw a small circle (of radius 1) to show the center.
             cv2.circle(img, (a, b), 1, (0, 0, 255), 3)
-            output_circles.append([a,b,r])
+            output_circles.append([a,360-b,r])
     
+    cv2.imshow("Detected Components",img)
     return output_lines,output_circles
 
 #reveal_all_constraints(cons)

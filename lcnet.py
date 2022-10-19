@@ -11,7 +11,7 @@ import networkx as nx
 
 from config import *
 
-eps = 5
+eps = 7
 
 def L2Norm(x,y):
     if x is not torch.tensor: x = torch.tensor(float(x))
@@ -80,7 +80,8 @@ class LCNet(nn.Module):
         self.point_count  = 0
 
         x = []
-        
+        self.circles = {}
+        self.lines   = {}        
         # just don't detect whether input segments are the same for a while.
         # the version is crude, but is should work.
         for line in lines:
@@ -113,13 +114,14 @@ class LCNet(nn.Module):
             line = self.lines[k]
         for k in self.circles:
             circle = self.circles[k]
-        print(self.lines,self.circles)
+
         connect_edges = torch.tensor(edges_list,dtype = torch.long)
         connect_edges = connect_edges.t().contiguous()
 
         return Data(x = d,edges = connect_edges)
 
     def realize_lc(self,data):
+
         output = self.forward(data)
 
         lines = [[],output[:self.line_count]];circles = [[],output[self.line_count:]]
