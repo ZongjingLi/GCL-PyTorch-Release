@@ -11,13 +11,24 @@ import networkx as nx
 
 from config import *
 
-def same_circle(a,b):
-    x1,y1 = a; x2,y2 = b
-    print(x1,y1)
-    print(x2,y2)
-    return False
+eps = 5
 
-def same_line(a,b):return False
+def L2Norm(x,y):
+    if x is not torch.tensor: x = torch.tensor(x)
+    if y is not torch.tensor: y = torch.tensor(y)
+    return torch.sqrt(x*x + y*y)
+
+def same_circle(a,b):
+    x1,y1,r1 = a; x2,y2,r2 = b
+    if L2Norm(x1-x2,y1-y2) > eps or torch.abs(r1-r2)> eps:return False
+    return True
+
+def same_line(a,b):
+    start1,end1 = a;start2,end2 = b
+    xs1,ys1 = start1;xe1,ye1 = end1;
+    xs2,ys2 = start2;xe2,ye2 = end2;
+    if L2Norm(xs1-xs2,ys1-ys2) > eps or L2Norm(xe1-xe2,ye1-ye2) > eps:return False
+    return True
 
 class LCNet(nn.Module):
     def __init__(self,opt = model_opt):
@@ -96,7 +107,7 @@ class LCNet(nn.Module):
 
         d = torch.cat(x,0)
 
-        edges_list = []
+        edges_list = [[0,1]]
         for k in self.lines:
             line = self.lines[k]
         for k in self.circles:
