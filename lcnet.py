@@ -11,7 +11,11 @@ import networkx as nx
 
 from config import *
 
-def same_circle(a,b):return False
+def same_circle(a,b):
+    x1,y1 = a; x2,y2 = b
+    print(x1,y1)
+    print(x2,y2)
+    return False
 
 def same_line(a,b):return False
 
@@ -93,6 +97,10 @@ class LCNet(nn.Module):
         d = torch.cat(x,0)
 
         edges_list = []
+        for k in self.lines:
+            line = self.lines[k]
+        for k in self.circles:
+            circle = self.circles[k]
 
         connect_edges = torch.tensor(edges_list,dtype = torch.long)
         connect_edges = connect_edges.t().contiguous()
