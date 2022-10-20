@@ -32,7 +32,7 @@ train_loader = DataLoader(dataset, batch_size = 1, shuffle = True)
 
 # the Adam optimizer for the constuctor and lcnet
 con_optimizer = torch.optim.Adam(model.parameters(), lr = 2e-4);plt.ion()
-plt.ion()
+
 bce_history = []
 for epoch in range(train_config.epoch):
     
@@ -47,13 +47,14 @@ for epoch in range(train_config.epoch):
         recons,logp = model(concept,image,path)
         
         bce_loss = BCELoss(torch.tensor(recons).float()/256,image[0][0].float())
-        total_loss += logp * bce_loss
+        total_loss += logp.exp() * bce_loss
         bce += bce_loss;lp+=logp
 
-    print("Logp:{} BCE:{}".format(lp,bce))
     bce_history.append(bce)
-    plt.subplot(212)
-    plt.plot(bce_history);plt.pause(1)
+    if epoch % 5 == 0:
+        print("epoch:{} Logp:{} BCE:{}".format(epoch,lp,bce))
+        plt.subplot(212)
+        plt.plot(bce_history);plt.pause(1)
     # calculate all the gradient and do a REINFORCE
     con_optimizer.zero_grad()
     total_loss.backward(retain_graph = True)
