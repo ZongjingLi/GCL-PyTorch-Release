@@ -42,7 +42,7 @@ for epoch in range(train_config.epoch):
     bce = 0;lp =0;
     for sample in train_loader:
         raw_concept,image,path = sample["concept"],sample["image"],sample["path"]
-        
+        print(raw_concept,path)
         concept = [t[0] for t in raw_concept]
 
         recons,logp = model(concept,image,path)

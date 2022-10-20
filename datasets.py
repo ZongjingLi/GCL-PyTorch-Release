@@ -136,7 +136,7 @@ class AllElementsData(Dataset):
             for i in range(5):
                 name_path = os.path.join(
                 self.root_dir,"elements","concept_{}".format(name),
-                self.split,"train/{}_fin.png".format(i+1)
+                self.split,"{}_fin.png".format(i+1)
                 )
                 self.element_files.append([program,name_path])
 
