@@ -112,3 +112,40 @@ class GCLData(Dataset):
         params = self.params["data"][index]
         
         return {"image":image,"params":params}
+
+
+
+class AllElementsData(Dataset):
+    def __init__(self,split = "train",name = "angle",resolution = model_opt.resolution):
+        super().__init__()
+
+        elements = ["ang_bisector","angle","diameter","eq_t","oblong","parallel",
+                    "perp_bisector","quadrilateral","radii","rectilinear","rhomboid",
+                    "rhombus","right_ang_t","segment","sixty_ang","square","triangle"]
+
+        assert split in ["train","test"],print("split {} not recognized.".format(split))
+        self.root_dir = "geoclidean"
+        self.concept_name = name
+        self.split = split
+
+        self.element_files = []
+
+        for name in elements:
+            for i in range(5):
+                name_path = os.path.join(
+                self.root_dir,"elements","concept_{}".format(self.concept_name),
+                self.split,"train/{}_fin.png".format(i+1)
+                )
+                self.element_files.append(name_path)
+
+        self.img_transform = transforms.Compose(
+            [   
+                transforms.ToTensor()]
+        )
+        self.resolution = resolution
+
+    def __len__(self):return len(self.element_files)
+
+    def __getitem__(self,index):
+        index = index + 1
+        bind =  self.element_files[index]

@@ -47,7 +47,7 @@ for epoch in range(train_config.epoch):
         recons,logp = model(concept,image,path)
         
         bce_loss = BCELoss(torch.tensor(recons).float()/256,image[0][0].float())
-        total_loss += logp.exp() * bce_loss
+        total_loss += logp * bce_loss.log()
         bce += bce_loss;lp+=logp
 
     bce_history.append(bce)
