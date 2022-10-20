@@ -14,7 +14,7 @@ from config import *
 torch.autograd.set_detect_anomaly(True)
 
 train_parser = argparse.ArgumentParser()
-train_parser.add_argument("--epoch", default = 9999, type = int, help = "the default trainingepoch for the model")
+train_parser.add_argument("--epoch", default = 300, type = int, help = "the default trainingepoch for the model")
 train_parser.add_argument("--lr", default = 2e-4, type = float, help = "the learning rate for the optimizer")
 train_parser.add_argument("--mode", default = "Mode", type = str, help = "the training mode for the geometric concept")
 train_parser.add_argument("--checkpoint_path", default = None, help = "the location of the check point")
@@ -42,7 +42,7 @@ for epoch in range(train_config.epoch):
     bce = 0;lp =0;
     for sample in train_loader:
         raw_concept,image,path = sample["concept"],sample["image"],sample["path"]
-        print(raw_concept,path)
+        #print(raw_concept,path)
         concept = [t[0] for t in raw_concept]
 
         recons,logp = model(concept,image,path)
@@ -52,7 +52,7 @@ for epoch in range(train_config.epoch):
         bce += bce_loss;lp+=logp
 
     bce_history.append(bce)
-    if epoch % 15 == 0:
+    if epoch % 10 == 0:
         print("epoch:{} Logp:{} BCE:{}".format(epoch,lp,bce))
         plt.subplot(212)
         plt.plot(bce_history);plt.pause(1)
