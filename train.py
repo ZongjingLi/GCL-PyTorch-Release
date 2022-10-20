@@ -52,13 +52,13 @@ for epoch in range(train_config.epoch):
         bce += bce_loss;lp+=logp
 
     bce_history.append(bce)
-    if epoch % 10 == 0:
+    if epoch % 1 == 0:
         print("epoch:{} Logp:{} BCE:{}".format(epoch,lp,bce))
-        plt.subplot(212)
+        plt.figure("loss");plt.cla()
         plt.plot(bce_history);plt.pause(1)
     # calculate all the gradient and do a REINFORCE
     con_optimizer.zero_grad()
     total_loss.backward(retain_graph = True)
-    con_optimizer.step();plt.cla()
-    plt.close()
+    con_optimizer.step();
+    
 
