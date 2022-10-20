@@ -56,9 +56,11 @@ for epoch in range(train_config.epoch):
         print("epoch:{} Logp:{} BCE:{}".format(epoch,lp,bce))
         plt.figure("loss");plt.cla()
         plt.plot(bce_history);plt.pause(1)
+        torch.save(model,"model.ckpt")
     # calculate all the gradient and do a REINFORCE
     con_optimizer.zero_grad()
     total_loss.backward(retain_graph = True)
     con_optimizer.step();
+    
     
 
