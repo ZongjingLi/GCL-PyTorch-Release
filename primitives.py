@@ -451,8 +451,8 @@ class GeometricConstructor(nn.Module):
         for node in self.structure.nodes:build_node(node)
 
         for obj  in realized_visibles:current_plot = plot_object(current_plot, obj)
-        #plt.pause(0.0001);plt.cla()
-        plt.show()
+        plt.pause(0.0001);plt.cla()
+        #plt.show()
         out = numpy_from_plot(current_plot)
         plt.close()
         return out,self.construction_logp

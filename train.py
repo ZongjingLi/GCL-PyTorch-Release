@@ -52,7 +52,7 @@ for epoch in range(train_config.epoch):
         bce += bce_loss;lp+=logp
 
     bce_history.append(bce)
-    if epoch % 5 == 0:
+    if epoch % 15 == 0:
         print("epoch:{} Logp:{} BCE:{}".format(epoch,lp,bce))
         plt.subplot(212)
         plt.plot(bce_history);plt.pause(1)
