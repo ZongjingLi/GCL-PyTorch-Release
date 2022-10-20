@@ -149,7 +149,6 @@ class AllElementsData(Dataset):
     def __len__(self):return len(self.element_files)
 
     def __getitem__(self,index):
-        index = index + 1
         bind =  self.element_files[index]
         image = Image.open(bind[1]).convert('L')
         image = self.img_transform(image)
