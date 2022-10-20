@@ -116,27 +116,29 @@ class GCLData(Dataset):
 
 
 class AllElementsData(Dataset):
-    def __init__(self,split = "train",name = "angle",resolution = model_opt.resolution):
+    def __init__(self,split = "train",resolution = model_opt.resolution):
         super().__init__()
 
-        elements = ["ang_bisector","angle","diameter","eq_t","oblong","parallel",
+        elements = ["ang_bisector","angle","diameter","eq_t","oblong","parallel_l",
                     "perp_bisector","quadrilateral","radii","rectilinear","rhomboid",
                     "rhombus","right_ang_t","segment","sixty_ang","square","triangle"]
 
         assert split in ["train","test"],print("split {} not recognized.".format(split))
         self.root_dir = "geoclidean"
-        self.concept_name = name
         self.split = split
 
         self.element_files = []
 
         for name in elements:
+            concept_file = open(os.path.join(self.root_dir,"elements","concept_{}".format(name),"concept.txt"), "r")
+            raw_programs = concept_file.readlines()
+            program = [term[1:-3] for term in raw_programs]
             for i in range(5):
                 name_path = os.path.join(
-                self.root_dir,"elements","concept_{}".format(self.concept_name),
+                self.root_dir,"elements","concept_{}".format(name),
                 self.split,"train/{}_fin.png".format(i+1)
                 )
-                self.element_files.append(name_path)
+                self.element_files.append([program,name_path])
 
         self.img_transform = transforms.Compose(
             [   
@@ -149,3 +151,6 @@ class AllElementsData(Dataset):
     def __getitem__(self,index):
         index = index + 1
         bind =  self.element_files[index]
+        image = Image.open(bind[1]).convert('L')
+        image = self.img_transform(image)
+        return {"concept":bind[0],"image":image,"path":bind[1]}

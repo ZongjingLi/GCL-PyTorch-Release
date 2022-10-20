@@ -28,6 +28,7 @@ visualize = True
 model = GCL(model_opt)
 
 dataset = GeometricElementsData("train","angle") # the geometric concept dataset for training
+dataset = AllElementsData("train")
 train_loader = DataLoader(dataset, batch_size = 1, shuffle = True)
 
 # the Adam optimizer for the constuctor and lcnet
