@@ -377,6 +377,7 @@ class GeometricConstructor(nn.Module):
             if node in upward_memory_storage:return upward_memory_storage[node]# is it is calculated, nothing happens
             primitive_type =  ptype(node)
             connect_to     =  find_connection(node,self.structure,loc = 1)
+            #print(node,primitive_type)
             if node == "<V>":return
             if primitive_type == "circle": # use the circle propagator to calculate mlpc(cat([ec1,ec2]))
                 assert len(connect_to) == 2,print("the circle is connected to {} parameters (2 expected).".format(len(connect_to)))
