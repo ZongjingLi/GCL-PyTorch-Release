@@ -26,6 +26,7 @@ BCELoss = torch.nn.BCELoss(reduction = "mean")
 visualize = True
 
 model = GCL(model_opt)
+model = torch.load("model.ckpt")
 
 dataset = GeometricElementsData("train","angle") # the geometric concept dataset for training
 dataset = AllElementsData("train")
